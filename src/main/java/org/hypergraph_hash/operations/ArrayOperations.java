@@ -1,9 +1,6 @@
 package org.hypergraph_hash.operations;
 
-import java.nio.ByteBuffer;
 import java.util.List;
-
-import static org.hypergraph_hash.operations.BitOperations.concatByteArrays;
 
 public class ArrayOperations {
   public static byte[] listToArray(List<byte[]> list) {
@@ -33,38 +30,5 @@ public class ArrayOperations {
     }
 
     return array;
-  }
-
-  public static long byteArrayToLongLittleEndian(byte[] bytes) {
-    if (bytes.length > Long.BYTES) {
-      throw new IllegalArgumentException("Array length must be <= " + Long.BYTES + " bytes");
-    }
-
-    long value = 0;
-    for (int i = 0; i < bytes.length; i++) {
-      value |= Byte.toUnsignedLong(bytes[i]) << (i * 8);
-    }
-
-    return value;
-  }
-
-  public static long byteArrayToLongBigEndian(byte[] bytes) {
-    if (bytes.length > Long.BYTES) {
-      throw new IllegalArgumentException("Array length must be <= " + Long.BYTES + " bytes");
-    }
-
-    long value = 0;
-    for (int i = 0; i < bytes.length; i++) {
-      value |= Byte.toUnsignedLong(bytes[i]) << ((bytes.length - 1 - i) * 8);
-    }
-
-    return value;
-  }
-
-  public static byte[] concatLongToByteArray(long L, long R) {
-    byte[] arrL = ByteBuffer.allocate(Long.BYTES).putLong(L).array();
-    byte[] arrR = ByteBuffer.allocate(Long.BYTES).putLong(R).array();
-
-    return concatByteArrays(arrL, arrR);
   }
 }
