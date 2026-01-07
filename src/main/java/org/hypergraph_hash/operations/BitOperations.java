@@ -1,6 +1,8 @@
 package org.hypergraph_hash.operations;
 
 public class BitOperations {
+  private BitOperations() {}
+
   public static byte bitAt(int bitIndex, byte value) {
     return (byte) ((Byte.toUnsignedInt(value) >>> (7 - bitIndex % 8)) & 1);
   }
@@ -35,6 +37,12 @@ public class BitOperations {
     }
 
     return res;
+  }
+
+  public static void xorInPlace(byte[] out, int outFrom, byte[] in, int inFrom, int count) {
+    for (int i = 0; i < count; i++) {
+      out[outFrom + i] ^= in[inFrom + i];
+    }
   }
 
   public static long zeroMask(int bitCount) {

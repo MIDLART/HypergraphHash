@@ -3,6 +3,8 @@ package org.hypergraph_hash.operations;
 import java.util.List;
 
 public class ArrayOperations {
+  private ArrayOperations() {}
+
   public static byte[] listToArray(List<byte[]> list) {
     if (list == null || list.isEmpty()) return new byte[0];
     if (list.size() == 1) return list.getFirst();
@@ -30,5 +32,15 @@ public class ArrayOperations {
     }
 
     return array;
+  }
+
+  public static int arrayIndexOf(int[] arr, int elem) {
+    for (int i = 0; i < arr.length; i++) {
+      if (arr[i] == elem) {
+        return i;
+      }
+    }
+
+    return -1;
   }
 }
