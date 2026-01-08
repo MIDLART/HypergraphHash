@@ -2,7 +2,7 @@ package org.hypergraph_hash.testHypergraphEncryption;
 
 import org.hypergraph_hash.hypergraph.HomogenousHypergraph;
 import org.hypergraph_hash.hypergraph.HyperEdge;
-import org.hypergraph_hash.hypergraph.HypergraphEncryption;
+import org.hypergraph_hash.hypergraph.transform.HypergraphEncryption;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

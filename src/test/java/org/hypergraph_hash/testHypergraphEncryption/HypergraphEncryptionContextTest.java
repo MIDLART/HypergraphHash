@@ -3,7 +3,7 @@ package org.hypergraph_hash.testHypergraphEncryption;
 import org.hypergraph_hash.SymmetricAlgorithm;
 import org.hypergraph_hash.hypergraph.HomogenousHypergraph;
 import org.hypergraph_hash.hypergraph.HyperEdge;
-import org.hypergraph_hash.hypergraph.HypergraphEncryption;
+import org.hypergraph_hash.hypergraph.transform.HypergraphEncryption;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
