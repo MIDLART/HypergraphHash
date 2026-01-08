@@ -1,4 +1,4 @@
-package org.hypergraph_hash.block;
+package org.hypergraph_hash.symmetric_encryption.block;
 
 import java.util.List;
 import java.util.function.Function;

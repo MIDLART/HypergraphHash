@@ -1,17 +1,17 @@
-package org.hypergraph_hash.modes;
+package org.hypergraph_hash.symmetric_encryption.modes;
 
-import org.hypergraph_hash.SymmetricEncryption;
-import org.hypergraph_hash.block.ReadBlock;
-import org.hypergraph_hash.block.WriteBlock;
-import org.hypergraph_hash.enums.EncryptOrDecrypt;
-import org.hypergraph_hash.enums.EncryptionMode;
+import org.hypergraph_hash.symmetric_encryption.SymmetricEncryption;
+import org.hypergraph_hash.symmetric_encryption.block.ReadBlock;
+import org.hypergraph_hash.symmetric_encryption.block.WriteBlock;
+import org.hypergraph_hash.symmetric_encryption.enums.EncryptOrDecrypt;
+import org.hypergraph_hash.symmetric_encryption.enums.EncryptionMode;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 
-import static org.hypergraph_hash.enums.EncryptOrDecrypt.ENCRYPT;
+import static org.hypergraph_hash.symmetric_encryption.enums.EncryptOrDecrypt.ENCRYPT;
 import static org.hypergraph_hash.operations.BitOperations.xor;
 
 public class EncryptionModes {

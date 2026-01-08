@@ -1,6 +1,6 @@
 package org.hypergraph_hash.hypergraph.transform;
 
-import org.hypergraph_hash.SymmetricEncryption;
+import org.hypergraph_hash.symmetric_encryption.SymmetricEncryption;
 import org.hypergraph_hash.hypergraph.HomogenousHypergraph;
 
 import java.util.Arrays;
@@ -11,6 +11,21 @@ import static org.hypergraph_hash.operations.BitOperations.xorInPlace;
 public class HypergraphEncryption extends HypergraphTransform implements SymmetricEncryption {
   public HypergraphEncryption(HomogenousHypergraph key, int smallBlockSize) {
     super(key, smallBlockSize);
+  }
+
+  @Override
+  public final byte[] encryption(byte[] text) {
+    return validateAndTransform(text, IntUnaryOperator.identity());
+  }
+
+  @Override
+  public final byte[] decryption(byte[] text) {
+    return validateAndTransform(text, i -> hypergraphAdjacencyLists.length - 1 - i);
+  }
+
+  @Override
+  public final int getBlockSize() {
+    return blockSize;
   }
 
   @Override

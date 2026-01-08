@@ -1,4 +1,4 @@
-package org.hypergraph_hash.block;
+package org.hypergraph_hash.symmetric_encryption.block;
 
 import lombok.extern.slf4j.Slf4j;
 

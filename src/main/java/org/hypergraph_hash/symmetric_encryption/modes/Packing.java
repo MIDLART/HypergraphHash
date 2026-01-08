@@ -1,7 +1,7 @@
-package org.hypergraph_hash.modes;
+package org.hypergraph_hash.symmetric_encryption.modes;
 
 import lombok.Getter;
-import org.hypergraph_hash.enums.PackingMode;
+import org.hypergraph_hash.symmetric_encryption.enums.PackingMode;
 
 import java.security.SecureRandom;
 import java.util.Arrays;

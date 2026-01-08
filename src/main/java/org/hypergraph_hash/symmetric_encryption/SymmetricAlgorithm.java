@@ -1,11 +1,11 @@
-package org.hypergraph_hash;
+package org.hypergraph_hash.symmetric_encryption;
 
-import org.hypergraph_hash.block.*;
-import org.hypergraph_hash.enums.EncryptOrDecrypt;
-import org.hypergraph_hash.enums.EncryptionMode;
-import org.hypergraph_hash.enums.PackingMode;
-import org.hypergraph_hash.modes.EncryptionModes;
-import org.hypergraph_hash.modes.Packing;
+import org.hypergraph_hash.symmetric_encryption.block.*;
+import org.hypergraph_hash.symmetric_encryption.enums.EncryptOrDecrypt;
+import org.hypergraph_hash.symmetric_encryption.enums.EncryptionMode;
+import org.hypergraph_hash.symmetric_encryption.enums.PackingMode;
+import org.hypergraph_hash.symmetric_encryption.modes.EncryptionModes;
+import org.hypergraph_hash.symmetric_encryption.modes.Packing;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hypergraph_hash.enums.EncryptOrDecrypt.*;
 import static org.hypergraph_hash.operations.ArrayOperations.listToArray;
+import static org.hypergraph_hash.symmetric_encryption.enums.EncryptOrDecrypt.*;
 import static org.hypergraph_hash.utilities.Validation.EMPTY_INPUT;
 import static org.hypergraph_hash.utilities.Validation.validateNotZero;
 

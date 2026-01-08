@@ -1,4 +1,4 @@
-package org.hypergraph_hash.enums;
+package org.hypergraph_hash.symmetric_encryption.enums;
 
 public enum EncryptionMode {
   ECB,

@@ -1,6 +1,6 @@
 package org.hypergraph_hash.testHypergraphEncryption;
 
-import org.hypergraph_hash.SymmetricAlgorithm;
+import org.hypergraph_hash.symmetric_encryption.SymmetricAlgorithm;
 import org.hypergraph_hash.hypergraph.HomogenousHypergraph;
 import org.hypergraph_hash.hypergraph.HyperEdge;
 import org.hypergraph_hash.hypergraph.transform.HypergraphEncryption;
@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hypergraph_hash.enums.EncryptionMode.*;
-import static org.hypergraph_hash.enums.PackingMode.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hypergraph_hash.symmetric_encryption.enums.EncryptionMode.*;
+import static org.hypergraph_hash.symmetric_encryption.enums.PackingMode.*;
 
 class HypergraphEncryptionContextTest {
   private static final String TEST_DIRECTORY = "src/test/resources/HypergraphEncryptionTest";

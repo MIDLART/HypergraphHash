@@ -1,6 +1,5 @@
 package org.hypergraph_hash.hypergraph.transform;
 
-import org.hypergraph_hash.SymmetricEncryption;
 import org.hypergraph_hash.hypergraph.HomogenousHypergraph;
 
 import java.util.Arrays;
@@ -8,7 +7,7 @@ import java.util.function.IntUnaryOperator;
 
 import static org.hypergraph_hash.utilities.Validation.*;
 
-public abstract class HypergraphTransform implements SymmetricEncryption {
+public abstract class HypergraphTransform {
   protected final int blockSize;
   protected final int smallBlockSize; //TODO Bit
 
@@ -28,21 +27,6 @@ public abstract class HypergraphTransform implements SymmetricEncryption {
               .filter(incidentVertex -> incidentVertex > vertex)
               .toArray();
     }
-  }
-
-  @Override
-  public final byte[] encryption(byte[] text) {
-    return validateAndTransform(text, IntUnaryOperator.identity());
-  }
-
-  @Override
-  public final byte[] decryption(byte[] text) {
-    return validateAndTransform(text, i -> hypergraphAdjacencyLists.length - 1 - i);
-  }
-
-  @Override
-  public final int getBlockSize() {
-    return blockSize;
   }
 
 
