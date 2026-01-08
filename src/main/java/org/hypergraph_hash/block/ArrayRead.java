@@ -1,6 +1,7 @@
 package org.hypergraph_hash.block;
 
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class ArrayRead implements ReadBlock {
   private final byte[] input;
@@ -8,7 +9,7 @@ public class ArrayRead implements ReadBlock {
   private final long inputSize;
   private Function<byte[], byte[]> packingFunction = null;
 
-  public ArrayRead(byte[] input, int blockSize, Function<byte[], byte[]> packing) {
+  public ArrayRead(byte[] input, int blockSize, UnaryOperator<byte[]> packing) {
     this.input = input;
     this.blockSize = blockSize;
     this.packingFunction = packing;

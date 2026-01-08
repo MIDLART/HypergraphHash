@@ -2,6 +2,7 @@ package org.hypergraph_hash.block;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class ListWrite implements WriteBlock {
   private final List<byte[]> output;
@@ -9,7 +10,7 @@ public class ListWrite implements WriteBlock {
   private final Function<byte[], byte[]> unpackingFunction;
   private final int arrSize;
 
-  public ListWrite(List<byte[]> output, int blockSize, int arrSize, Function<byte[], byte[]> unpackingFunction) {
+  public ListWrite(List<byte[]> output, int blockSize, int arrSize, UnaryOperator<byte[]> unpackingFunction) {
     this.output = output;
     this.blockSize = blockSize;
     this.unpackingFunction = unpackingFunction;

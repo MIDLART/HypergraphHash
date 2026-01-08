@@ -1,4 +1,4 @@
-package testHypergraphEncryption;
+package org.hypergraph_hash.testHypergraphEncryption;
 
 import org.hypergraph_hash.hypergraph.HomogenousHypergraph;
 import org.hypergraph_hash.hypergraph.HyperEdge;

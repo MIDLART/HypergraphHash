@@ -1,6 +1,7 @@
 package org.hypergraph_hash.operations;
 
 public class GaloisFieldOperations {
+  private GaloisFieldOperations() {}
 
   /// 2^8
 

@@ -15,6 +15,8 @@ import java.util.List;
 
 import static org.hypergraph_hash.enums.EncryptOrDecrypt.*;
 import static org.hypergraph_hash.operations.ArrayOperations.listToArray;
+import static org.hypergraph_hash.utilities.Validation.EMPTY_INPUT;
+import static org.hypergraph_hash.utilities.Validation.validateNotZero;
 
 public class SymmetricAlgorithm {
   private final int blockSize;
@@ -34,18 +36,18 @@ public class SymmetricAlgorithm {
   public SymmetricAlgorithm(SymmetricEncryption symmetricEncryption,
                             EncryptionMode encryptionMode,
                             PackingMode packingMode,
-                            byte[] IV) {
-    this(symmetricEncryption, encryptionMode, packingMode, IV, BigInteger.ONE);
+                            byte[] iv) {
+    this(symmetricEncryption, encryptionMode, packingMode, iv, BigInteger.ONE);
   }
 
   public SymmetricAlgorithm(SymmetricEncryption symmetricEncryption,
                             EncryptionMode encryptionMode,
                             PackingMode packingMode,
-                            byte[] IV,
+                            byte[] iv,
                             BigInteger delta) {
     blockSize = symmetricEncryption.getBlockSize();
 
-    encryptionModes = new EncryptionModes(symmetricEncryption, encryptionMode, IV, delta);
+    encryptionModes = new EncryptionModes(symmetricEncryption, encryptionMode, iv, delta);
     packing = new Packing(blockSize, packingMode);
   }
   
@@ -62,9 +64,7 @@ public class SymmetricAlgorithm {
   public void encrypt(byte[] input, byte[] output) {
     int inputLength = input.length;
 
-    if (inputLength == 0) {
-      throw new IllegalArgumentException("Input is empty");
-    }
+    validateNotZero(inputLength, EMPTY_INPUT);
 
     if (output.length < getBlockCount(inputLength, ENCRYPT) * blockSize) {
       throw new IllegalArgumentException("Output is too small");
@@ -89,9 +89,7 @@ public class SymmetricAlgorithm {
   public void decrypt(byte[] input, byte[] output) {
     int inputLength = input.length;
 
-    if (inputLength == 0) {
-      throw new IllegalArgumentException("Input is empty");
-    }
+    validateNotZero(inputLength, EMPTY_INPUT);
 
     if (inputLength != output.length) {
       throw new IllegalArgumentException("Invalid output length");
@@ -106,9 +104,7 @@ public class SymmetricAlgorithm {
   public byte[] decrypt(byte[] input) {
     int inputLength = input.length;
 
-    if (inputLength == 0) {
-      throw new IllegalArgumentException("Input is empty");
-    }
+    validateNotZero(inputLength, EMPTY_INPUT);
 
     List<byte[]> outputList =
             Collections.synchronizedList(
@@ -135,15 +131,15 @@ public class SymmetricAlgorithm {
 
   private void fileErrorCheck(String inputFile, String outputFile) {
     if (inputFile == null || inputFile.isEmpty() || !(new File(inputFile).exists())) {
-      throw new RuntimeException("Input file not found ");
+      throw new IllegalArgumentException("Input file not found ");
     }
 
     if (outputFile == null || outputFile.isEmpty()) {
-      throw new RuntimeException("Output file name is empty");
+      throw new IllegalArgumentException("Output file name is empty");
     }
 
     if (inputFile.equals(outputFile)) {
-      throw new RuntimeException("Input and output files cannot be the same");
+      throw new IllegalArgumentException("Input and output files cannot be the same");
     }
   }
 

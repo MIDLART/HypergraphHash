@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.hypergraph_hash.utilites.Validation.*;
+import static org.hypergraph_hash.utilities.Validation.*;
 
 @Getter
 public class HomogenousHypergraph {

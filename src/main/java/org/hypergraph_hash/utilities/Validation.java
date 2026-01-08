@@ -1,4 +1,4 @@
-package org.hypergraph_hash.utilites;
+package org.hypergraph_hash.utilities;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -6,6 +6,9 @@ import java.util.Objects;
 
 public class Validation {
   private Validation() {}
+
+
+  public static final String EMPTY_INPUT = "Input is empty";
 
 
   public static <T extends Number> void validateNonNegative(T value, String name) {
@@ -50,6 +53,17 @@ public class Validation {
     if (!Objects.equals(value1, value2)) {
       throw new IllegalArgumentException(name1 + " must be equal to " + name2 + ". " +
                                          "value1: " + value1 + ", value2: " + value2);
+    }
+  }
+
+  public static <T extends Number> void validateNotZero(T value, String errorMessage) {
+    boolean valid = switch (value) {
+      case BigInteger bigInteger -> bigInteger.signum() != 0;
+      case Number number -> number.longValue() != 0;
+    };
+
+    if (!valid) {
+      throw new IllegalArgumentException(errorMessage);
     }
   }
 }

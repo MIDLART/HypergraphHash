@@ -1,9 +1,9 @@
 package org.hypergraph_hash;
 
 public interface SymmetricEncryption {
-  public byte[] encryption(byte[] text);
+  byte[] encryption(byte[] text);
 
-  public byte[] decryption(byte[] text);
+  byte[] decryption(byte[] text);
 
-  public int getBlockSize();
+  int getBlockSize();
 }

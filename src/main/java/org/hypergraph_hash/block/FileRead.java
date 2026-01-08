@@ -7,6 +7,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class FileRead implements ReadBlock {
   private final String fileName;
@@ -14,7 +15,7 @@ public class FileRead implements ReadBlock {
   private final long fileSize;
   private Function<byte[], byte[]> packingFunction = null;
 
-  public FileRead(String fileName, int blockSize, Function<byte[], byte[]> packing) {
+  public FileRead(String fileName, int blockSize, UnaryOperator<byte[]> packing) {
     this.fileName = fileName;
     this.blockSize = blockSize;
 
@@ -45,7 +46,7 @@ public class FileRead implements ReadBlock {
         input.read(ByteBuffer.wrap(block));
       }
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException("Failed to read file: " + fileName, e);
     }
 
     return block;

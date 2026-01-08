@@ -1,6 +1,7 @@
 package org.hypergraph_hash.block;
 
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class ArrayWrite implements WriteBlock {
   private final byte[] output;
@@ -12,7 +13,7 @@ public class ArrayWrite implements WriteBlock {
     this.blockSize = blockSize;
   }
 
-  public ArrayWrite(byte[] output, int blockSize, Function<byte[], byte[]> unpackingFunction) {
+  public ArrayWrite(byte[] output, int blockSize, UnaryOperator<byte[]> unpackingFunction) {
     this.output = output;
     this.blockSize = blockSize;
     this.unpackingFunction = unpackingFunction;

@@ -19,22 +19,22 @@ public class EncryptionModes {
   private final EncryptionMode encryptionMode;
 
   private final int blockSize;
-  private final byte[] IV;
+  private final byte[] iv;
 
-  private final BigInteger RD;
+  private final BigInteger rd;
   private final BigInteger rdMax;
 
   public EncryptionModes(SymmetricEncryption symmetricEncryption,
                          EncryptionMode encryptionMode,
-                         byte[] IV,
+                         byte[] iv,
                          BigInteger delta) {
     this.symmetricEncryption = symmetricEncryption;
     this.encryptionMode = encryptionMode;
     blockSize = symmetricEncryption.getBlockSize();
-    RD = delta;
+    rd = delta;
 
-    this.IV = new byte[blockSize];
-    System.arraycopy(IV, 0, this.IV, 0, blockSize);
+    this.iv = new byte[blockSize];
+    System.arraycopy(iv, 0, this.iv, 0, blockSize);
 
     rdMax = BigInteger.valueOf(2).pow(8 * blockSize);
   }
@@ -44,10 +44,10 @@ public class EncryptionModes {
     this.symmetricEncryption = symmetricEncryption;
     this.encryptionMode = encryptionMode;
     blockSize = symmetricEncryption.getBlockSize();
-    RD = BigInteger.ONE;
+    rd = BigInteger.ONE;
 
-    this.IV = new byte[blockSize];
-    new SecureRandom().nextBytes(IV);
+    this.iv = new byte[blockSize];
+    new SecureRandom().nextBytes(iv);
 
     rdMax = BigInteger.valueOf(2).pow(8 * blockSize);
   }
@@ -85,7 +85,7 @@ public class EncryptionModes {
     if (encryptOrDecrypt == ENCRYPT) {
       function = symmetricEncryption::encryption;
 
-      byte[] c = function.apply(xor(first, IV));
+      byte[] c = function.apply(xor(first, iv));
       writeBlock.put(0, c);
 
       for (int i = 1; i < blockCount; i++) {
@@ -97,7 +97,7 @@ public class EncryptionModes {
     } else {
       function = symmetricEncryption::decryption;
 
-      writeBlock.put(0, xor(function.apply(first), IV));
+      writeBlock.put(0, xor(function.apply(first), iv));
 
       IntStream.range(1, blockCount).parallel().forEach(i -> {
         byte[] c = readBlock.get(i);
@@ -111,7 +111,7 @@ public class EncryptionModes {
   private void OFB(ReadBlock readBlock, WriteBlock writeBlock, int blockCount) {
     UnaryOperator<byte[]> function = symmetricEncryption::encryption;
 
-    byte[] E = IV;
+    byte[] E = iv;
 
     for (int i = 0; i < blockCount; i++) {
       byte[] buffer = readBlock.get(i);
@@ -128,7 +128,7 @@ public class EncryptionModes {
     byte[] first = readBlock.get(0);
 
     if (encryptOrDecrypt == ENCRYPT) {
-      byte[] c = xor(function.apply(IV), first);
+      byte[] c = xor(function.apply(iv), first);
       writeBlock.put(0, c);
 
       for (int i = 1; i < blockCount; i++) {
@@ -139,7 +139,7 @@ public class EncryptionModes {
         writeBlock.put(i, c);
       }
     } else {
-      writeBlock.put(0, xor(function.apply(IV), first));
+      writeBlock.put(0, xor(function.apply(iv), first));
 
       IntStream.range(1, blockCount).parallel().forEach(i -> {
         byte[] c = readBlock.get(i);
@@ -159,7 +159,7 @@ public class EncryptionModes {
     if (encryptOrDecrypt == ENCRYPT) {
       function = symmetricEncryption::encryption;
 
-      byte[] c = function.apply(xor(first, IV));
+      byte[] c = function.apply(xor(first, iv));
       writeBlock.put(0, c);
 
       for (int i = 1; i < blockCount; i++) {
@@ -172,7 +172,7 @@ public class EncryptionModes {
     } else {
       function = symmetricEncryption::decryption;
 
-      byte[] m = xor(function.apply(first), IV);
+      byte[] m = xor(function.apply(first), iv);
       writeBlock.put(0, m);
 
       for (int i = 1; i < blockCount; i++) {
@@ -187,7 +187,7 @@ public class EncryptionModes {
 
   private void CTR(ReadBlock readBlock, WriteBlock writeBlock, int blockCount) {
     UnaryOperator<byte[]> function = symmetricEncryption::encryption;
-    BigInteger count = new BigInteger(IV);
+    BigInteger count = new BigInteger(iv);
 
     IntStream.range(0, blockCount).parallel().forEach(i -> {
       byte[] buffer = readBlock.get(i);
@@ -197,11 +197,11 @@ public class EncryptionModes {
 
   private void RandomDelta(ReadBlock readBlock, WriteBlock writeBlock, int blockCount) {
     UnaryOperator<byte[]> function = symmetricEncryption::encryption;
-    BigInteger count = new BigInteger(IV);
+    BigInteger count = new BigInteger(iv);
 
     IntStream.range(0, blockCount).parallel().forEach(i -> {
       byte[] buffer = readBlock.get(i);
-      writeBlock.put(i, xor(buffer, function.apply(counter(count, modularMultiply(RD, i)))));
+      writeBlock.put(i, xor(buffer, function.apply(counter(count, modularMultiply(rd, i)))));
     });
   }
 

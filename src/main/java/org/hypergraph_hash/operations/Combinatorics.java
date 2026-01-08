@@ -2,7 +2,7 @@ package org.hypergraph_hash.operations;
 
 import java.math.BigInteger;
 
-import static org.hypergraph_hash.utilites.Validation.validateNonNegative;
+import static org.hypergraph_hash.utilities.Validation.validateNonNegative;
 
 public class Combinatorics {
   private Combinatorics() {}

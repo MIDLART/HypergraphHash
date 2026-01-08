@@ -1,12 +1,16 @@
 package org.hypergraph_hash.block;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
+@Slf4j
 public class FileWrite implements WriteBlock {
   private final String fileName;
   private final int blockSize;
@@ -18,7 +22,7 @@ public class FileWrite implements WriteBlock {
     this.blockSize = blockSize;
   }
 
-  public FileWrite(String fileName, int blockSize, long fileSize, Function<byte[], byte[]> unpackingFunction) {
+  public FileWrite(String fileName, int blockSize, long fileSize, UnaryOperator<byte[]> unpackingFunction) {
     this.fileName = fileName;
     this.blockSize = blockSize;
     this.unpackingFunction = unpackingFunction;
@@ -36,13 +40,18 @@ public class FileWrite implements WriteBlock {
 
       output.position(index);
 
+      int written;
       if (unpackingFunction != null && index + blockSize >= fileSize) {
-        output.write(ByteBuffer.wrap(unpackingFunction.apply(block)));
+        written = output.write(ByteBuffer.wrap(unpackingFunction.apply(block)));
       } else {
-        output.write(ByteBuffer.wrap(block));
+        written = output.write(ByteBuffer.wrap(block));
+      }
+
+      if (written != block.length) {
+        log.warn("Incomplete block entry in a file");
       }
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException("Failed to write to file: " + fileName, e);
     }
   }
 }

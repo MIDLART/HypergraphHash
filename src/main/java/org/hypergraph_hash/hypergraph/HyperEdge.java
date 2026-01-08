@@ -36,10 +36,6 @@ public class HyperEdge {
   }
 
 
-  public int getVertex(int index) {
-    return vertices[index];
-  }
-
   public int dimension() {
     return vertices.length;
   }

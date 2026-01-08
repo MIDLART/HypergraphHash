@@ -1,5 +1,6 @@
 package org.hypergraph_hash.modes;
 
+import lombok.Getter;
 import org.hypergraph_hash.enums.PackingMode;
 
 import java.security.SecureRandom;
@@ -7,6 +8,7 @@ import java.util.Arrays;
 
 public class Packing {
   private final int size;
+  @Getter
   private final PackingMode mode;
 
   public Packing(int blockSize, PackingMode mode) {
@@ -32,10 +34,6 @@ public class Packing {
       case ISO10126 -> iso10126Unpack(input);
       default -> input;
     };
-  }
-
-  public PackingMode getMode() {
-    return mode;
   }
 
   /// Fill

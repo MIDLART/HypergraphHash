@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.function.IntUnaryOperator;
 
 import static org.hypergraph_hash.operations.BitOperations.xorInPlace;
-import static org.hypergraph_hash.utilites.Validation.*;
+import static org.hypergraph_hash.utilities.Validation.*;
 
 public class HypergraphEncryption implements SymmetricEncryption {
   private final int blockSize;
