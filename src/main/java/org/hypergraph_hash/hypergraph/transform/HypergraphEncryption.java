@@ -14,18 +14,8 @@ public class HypergraphEncryption extends HypergraphTransform implements Symmetr
   }
 
   @Override
-  public final byte[] encryption(byte[] text) {
-    return validateAndTransform(text, IntUnaryOperator.identity());
-  }
-
-  @Override
   public final byte[] decryption(byte[] text) {
     return validateAndTransform(text, i -> hypergraphAdjacencyLists.length - 1 - i);
-  }
-
-  @Override
-  public final int getBlockSize() {
-    return blockSize;
   }
 
   @Override

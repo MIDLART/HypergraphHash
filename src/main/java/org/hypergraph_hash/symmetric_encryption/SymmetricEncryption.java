@@ -1,6 +1,8 @@
 package org.hypergraph_hash.symmetric_encryption;
 
-public interface SymmetricEncryption {
+import org.hypergraph_hash.BlockTransform;
+
+public interface SymmetricEncryption extends BlockTransform {
   byte[] encryption(byte[] text);
 
   byte[] decryption(byte[] text);

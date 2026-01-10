@@ -3,8 +3,6 @@ package org.hypergraph_hash.operations;
 public class GaloisFieldOperations {
   private GaloisFieldOperations() {}
 
-  /// 2^8
-
   public static byte add(byte a, byte b) {
     return (byte) (a ^ b);
   }
@@ -13,19 +11,17 @@ public class GaloisFieldOperations {
     return (byte) (a ^ b);
   }
 
-  /// 2^11 and 2^13
-
-  public static int mult(int a, int b, int g, int n) {
+  public static int mult(int a, int b, int generatorPolynomial, int fieldSize) {
     int res = 0;
 
     while (b != 0) {
-      if ((b & 0x01) != 0) {
+      if ((b & 1) != 0) {
         res ^= a;
       }
       a <<= 1;
 
-      if (a >= n) {
-        a ^= g;
+      if (a >= fieldSize) {
+        a ^= generatorPolynomial;
       }
       b >>>= 1;
     }
@@ -33,12 +29,11 @@ public class GaloisFieldOperations {
     return res;
   }
 
-  public static byte exp3(int a, int g, int n) {
+  public static byte exp3(int a, int generatorPolynomial, int fieldSize) {
     if (a == 0) {
       return 0;
     }
 
-    return (byte) mult(a, mult(a, a, g, n), g, n);
+    return (byte) mult(a, mult(a, a, generatorPolynomial, fieldSize), generatorPolynomial, fieldSize);
   }
-
 }
