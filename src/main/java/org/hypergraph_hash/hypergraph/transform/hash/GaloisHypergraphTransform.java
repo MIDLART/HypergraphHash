@@ -7,12 +7,12 @@ import org.hypergraph_hash.operations.GaloisFieldOperations;
 import java.util.function.IntUnaryOperator;
 
 public class GaloisHypergraphTransform extends HypergraphTransform {
-  private static final int GF8_SIZE = 256;
-  private static final int GF8_IRREDUCIBLE = 0x11B;
+  public static final int GF8_SIZE = 256;
+  public static final int GF8_IRREDUCIBLE = 0x11B;
 
-  public GaloisHypergraphTransform(HomogenousHypergraph key, int smallBlockSize) {
-    super(key, smallBlockSize);
-  }
+//  public GaloisHypergraphTransform(HomogenousHypergraph key, int smallBlockSize) {
+//    super(key, smallBlockSize);
+//  }
 
   /// GF8
   public GaloisHypergraphTransform(HomogenousHypergraph key) {
@@ -29,6 +29,11 @@ public class GaloisHypergraphTransform extends HypergraphTransform {
 
       for (int adjacentVertex : hypergraphAdjacencyLists[vertex]) {
         int smallBlock = Byte.toUnsignedInt(text[adjacentVertex]);
+
+        if (smallBlock == 0) {
+          smallBlock = ((i + adjacentVertex) * adjacentVertex + 1) & 0xFF;
+        }
+
         val = GaloisFieldOperations.mult(val, smallBlock, GF8_IRREDUCIBLE, GF8_SIZE);
       }
 

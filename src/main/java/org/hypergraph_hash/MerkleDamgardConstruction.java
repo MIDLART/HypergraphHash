@@ -6,20 +6,20 @@ import org.hypergraph_hash.symmetric_encryption.modes.Packing;
 
 import static org.hypergraph_hash.operations.BitOperations.xor;
 import static org.hypergraph_hash.symmetric_encryption.enums.PackingMode.PKCS7;
+import static org.hypergraph_hash.utilities.CryptoUtilities.getHashIV;
 
 //TODO abstract?
 public class MerkleDamgardConstruction implements CryptographicHash {
   private final int hashLength; //TODO финальное сжатие
   
-  private final BlockTransform blockTransform;
+  protected final BlockTransform blockTransform;
   private final byte[] iv;
 
   public MerkleDamgardConstruction(BlockTransform blockTransform) {
     hashLength = blockTransform.getBlockSize();
     this.blockTransform = blockTransform;
 
-    this.iv = new byte[hashLength];
-    initIV();
+    this.iv = getHashIV(hashLength);
   }
 
   public MerkleDamgardConstruction(BlockTransform blockTransform,
@@ -33,6 +33,10 @@ public class MerkleDamgardConstruction implements CryptographicHash {
 
   @Override
   public byte[] hash(byte[] input) {
+    if (input == null || input.length == 0) {
+      return new byte[hashLength];
+    }
+
     ReadBlock readBlock = new ArrayRead(input, hashLength, new Packing(hashLength, PKCS7)::fill); //TODO специальный packing mode
 
     int blockCount = getBlockCount(input.length);
@@ -67,13 +71,7 @@ public class MerkleDamgardConstruction implements CryptographicHash {
     return input;
   }
 
-  private int getBlockCount(long length) {
+  protected int getBlockCount(long length) {
     return (int) (length / hashLength + 1);
-  }
-
-  private void initIV() {
-    for (int i = 0; i < hashLength; i++) {
-      iv[i] = (byte) i;
-    }
   }
 }

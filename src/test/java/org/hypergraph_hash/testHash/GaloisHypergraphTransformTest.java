@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 class GaloisHypergraphTransformTest {
   @Test
   void test() {
@@ -22,7 +20,7 @@ class GaloisHypergraphTransformTest {
     byte[] message = new byte[] {(byte) 0x27, (byte) 0x01, (byte) 0xFF, (byte) 0x11, (byte) 0xAD, (byte) 0x08};
 
     // EXECUTION
-    var hash = new GaloisHypergraphTransform(key, 1);
+    var hash = new GaloisHypergraphTransform(key);
     byte[] hashed = hash.encryption(message);
 
     // ASSERTION
