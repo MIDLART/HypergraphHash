@@ -3,6 +3,7 @@ package org.hypergraph_hash.testHash;
 import org.hypergraph_hash.GaloisHypergraphHash;
 import org.hypergraph_hash.hypergraph.HomogenousHypergraph;
 import org.hypergraph_hash.hypergraph.HyperEdge;
+import org.hypergraph_hash.statistics.Statistics;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -71,7 +72,7 @@ class GaloisHypergraphHashTest {
 
   @ParameterizedTest
   @MethodSource("messageProvider")
-  void uniformDistributionTest(byte[] message) {
+  void distributionTest(byte[] message) {
     // SETUP
     var key = HomogenousHypergraph.ofEdges(
             HyperEdge.of(0, 3, 4),
@@ -91,73 +92,23 @@ class GaloisHypergraphHashTest {
     totalMessages.incrementAndGet();
 
     // ASSERTION
-
+    assertThat(hash).isNotEmpty();
   }
 
 
 
   @AfterAll
   static void statistics() {
-    var stats = getHashStatistics();
-
-    if (stats.isEmpty()) {
+    if (hashCountMap.isEmpty()) {
       System.out.println("Нет данных для статистики");
       return;
     }
 
-    System.out.printf("Всего сообщений: %,d%n",
-            ((Number) stats.get("totalMessages")).longValue());
-    System.out.printf("Уникальных хешей: %,d%n",
-            ((Number) stats.get("uniqueHashes")).intValue());
-    System.out.printf("Макс. коллизий на хеш: %,d%n",
-            ((Number) stats.get("maxCollisions")).intValue());
-    System.out.printf("Мин. коллизий на хеш: %,d%n",
-            ((Number) stats.get("minCollisions")).intValue());
-    System.out.printf("Всего дубликатов: %,d%n",
-            ((Number) stats.get("totalDuplicates")).intValue());
-    System.out.printf("Коэффициент коллизий: %.6f%%%n",
-            ((Number) stats.get("collisionRate")).doubleValue());
+    var stats = new  Statistics(totalMessages.get(), hashCountMap);
 
+    stats.print();
 
-//    for (Map.Entry<String, AtomicInteger> entry : hashCountMap.entrySet()) {
-//      System.out.println(entry.getKey() + ": " + entry.getValue().get());
-//    }
-
-    List<Map.Entry<String, AtomicInteger>> sortedEntries = new ArrayList<>(hashCountMap.entrySet());
-    sortedEntries.sort((e1, e2) -> Integer.compare(e2.getValue().get(), e1.getValue().get()));
-    for (var entry : sortedEntries) {
-      System.out.println(entry.getKey() + ": " + entry.getValue());
-    }
-  }
-
-  static Map<String, Object> getHashStatistics() {
-    Map<String, Object> stats = new HashMap<>();
-
-    if (hashCountMap.isEmpty()) {
-      return stats;
-    }
-
-    int maxCount = 0;
-    int minCount = Integer.MAX_VALUE;
-    int totalDuplicates = 0;
-
-    for (AtomicInteger count : hashCountMap.values()) {
-      int c = count.get();
-      maxCount = Math.max(maxCount, c);
-      minCount = Math.min(minCount, c);
-      if (c > 1) {
-        totalDuplicates += (c - 1);
-      }
-    }
-
-    stats.put("totalMessages", totalMessages.get());
-    stats.put("uniqueHashes", hashCountMap.size());
-    stats.put("maxCollisions", maxCount);
-    stats.put("minCollisions", minCount);
-    stats.put("totalDuplicates", totalDuplicates);
-    stats.put("collisionRate", (double) totalDuplicates / totalMessages.get() * 100);
-
-    return stats;
+    printSortedHashCountMap();
   }
 
 
@@ -194,6 +145,18 @@ class GaloisHypergraphHashTest {
     }
 
     return hexString.toString();
+  }
+
+  private static void printSortedHashCountMap() {
+    System.out.println("\n=== HASHES ===\n");
+
+    List<Map.Entry<String, AtomicInteger>> sortedEntries = new ArrayList<>(hashCountMap.entrySet());
+    sortedEntries.sort((e1, e2)
+                    -> Integer.compare(e2.getValue().get(), e1.getValue().get()));
+
+    for (var entry : sortedEntries) {
+      System.out.println(entry.getKey() + ": " + entry.getValue());
+    }
   }
 
   // endregion
