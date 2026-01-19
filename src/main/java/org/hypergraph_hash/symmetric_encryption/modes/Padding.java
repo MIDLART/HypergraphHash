@@ -6,12 +6,12 @@ import org.hypergraph_hash.symmetric_encryption.enums.PackingMode;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
-public class Packing {
+public class Padding {
   private final int size;
   @Getter
   private final PackingMode mode;
 
-  public Packing(int blockSize, PackingMode mode) {
+  public Padding(int blockSize, PackingMode mode) {
     size = blockSize;
     this.mode = mode;
   }
@@ -63,9 +63,9 @@ public class Packing {
 
     System.arraycopy(input, 0, res, 0, inputLen);
 
-    byte N = (byte) (size - inputLen);
+    byte n = (byte) (size - inputLen);
     for (int i = inputLen; i < size; ++i) {
-      res[i] = N;
+      res[i] = n;
     }
 
     return res;
@@ -111,10 +111,6 @@ public class Packing {
   }
 
   private byte[] lastUnpack(byte[] input) {
-//    if (input[size - 1] < 0 || input[size - 1] > size) {
-//      return input;
-//    }
-
     int last = size - 1;
     return Arrays.copyOfRange(input, 0, size - input[last]);
   }

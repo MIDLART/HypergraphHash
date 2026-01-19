@@ -9,7 +9,7 @@ import java.util.function.IntUnaryOperator;
 import static org.hypergraph_hash.utilities.Validation.*;
 
 public abstract class HypergraphTransform implements BlockTransform {
-  protected final int blockSize;
+  protected final int blockSize; //TODO private
   protected final int smallBlockSize; //TODO Bit?
 
   protected final int[][] hypergraphAdjacencyLists;

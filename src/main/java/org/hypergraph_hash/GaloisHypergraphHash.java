@@ -6,10 +6,11 @@ import org.hypergraph_hash.operations.GaloisFieldOperations;
 
 import static org.hypergraph_hash.hypergraph.transform.hash.GaloisHypergraphTransform.GF8_IRREDUCIBLE;
 import static org.hypergraph_hash.hypergraph.transform.hash.GaloisHypergraphTransform.GF8_SIZE;
+import static org.hypergraph_hash.operations.BitOperations.xorIncompleteInPlace;
 
 public class GaloisHypergraphHash extends MerkleDamgardConstruction {
-  public GaloisHypergraphHash(HomogenousHypergraph key) {
-    super(new GaloisHypergraphTransform(key));
+  public GaloisHypergraphHash(HomogenousHypergraph key, int hashLength) {
+    super(new GaloisHypergraphTransform(key), hashLength);
   }
 
   @Override
@@ -19,9 +20,11 @@ public class GaloisHypergraphHash extends MerkleDamgardConstruction {
     for (int i = 0; i < prevHash.length; i++) {
       byte m = (byte) GaloisFieldOperations.mult(res[i], prevHash[i], GF8_IRREDUCIBLE, GF8_SIZE);
 
-      if (m != 0) {
-        res[i] = m;
+      if (m == 0) { //TODO
+        m = (byte) GaloisFieldOperations.mult((i + 1) * prevHash.length + i, prevHash[i], GF8_IRREDUCIBLE, GF8_SIZE);
       }
+
+      res[i] = m;
     }
 
     return res;
@@ -29,10 +32,12 @@ public class GaloisHypergraphHash extends MerkleDamgardConstruction {
 
   @Override
   protected byte[] finalisationFunction(byte[] input) {
-    byte[] res = new byte[1]; //TODO
+    byte[] res = new byte[hashLength];
 
-    for (byte b : input) {
-      res[0] = (byte) (res[0] ^ b);
+    int rounds = Math.ceilDiv(input.length, hashLength);
+
+    for (int i = 0; i < rounds; i++) {
+      xorIncompleteInPlace(res, 0, input, hashLength * i, hashLength);
     }
 
     return res;

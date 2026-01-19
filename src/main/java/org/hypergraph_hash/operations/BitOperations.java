@@ -12,7 +12,7 @@ public class BitOperations {
   }
 
   public static byte zeroMaskLow(int bitCount) {
-    return (byte) (~((1 << bitCount) - 1));
+    return (byte) (-(1 << bitCount));
   }
 
   public static byte zeroMaskHigh(int bitCount) {
@@ -45,6 +45,14 @@ public class BitOperations {
     }
   }
 
+  public static void xorIncompleteInPlace(byte[] out, int outFrom, byte[] in, int inFrom, int count) {
+    count = Math.min(count, in.length - inFrom);
+
+    for (int i = 0; i < count; i++) {
+      out[outFrom + i] ^= in[inFrom + i];
+    }
+  }
+
   public static long zeroMask(int bitCount) {
     if (bitCount == 64) {
       return -1;
@@ -56,21 +64,23 @@ public class BitOperations {
   public static long leftRotation(long x, long y, int size) {
     y %= size;
 
+    long res = x << y | (x >>> (size - y));
     if (size == 64) {
-      return x << y | (x >>> (size - y));
+      return res;
     }
 
-    return (x << y | (x >>> (size - y))) & zeroMask(size);
+    return res & zeroMask(size);
   }
 
   public static long rightRotation(long x, long y, int size) {
     y %= size;
 
+    long res = x >>> y | (x << (size - y));
     if (size == 64) {
-      return x >>> y | (x << (size - y));
+      return res;
     }
 
-    return (x >>> y | (x << (size - y))) & zeroMask(size);
+    return res & zeroMask(size);
   }
 
   public static long getBits(long x, int left, int right) {

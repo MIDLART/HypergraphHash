@@ -11,6 +11,7 @@ import static org.hypergraph_hash.utilities.Validation.validatePositive;
 public class Statistics {
   private final int totalMessages;
   private final int uniqueHashes;
+  private final int hashSpace;
 
   private int maxCollisions;
   private int minCollisions;
@@ -30,11 +31,12 @@ public class Statistics {
   private double chiSquared;
   private double kolmogorovSmirnov;
 
-  public Statistics(int totalMessages, Map<String, AtomicInteger> hashCountMap) {
+  public Statistics(int totalMessages, int hashLength, Map<String, AtomicInteger> hashCountMap) {
     validatePositive(totalMessages, "totalMessages");
     validatePositive(hashCountMap.size(), "hashCountMap.size");
     this.totalMessages = totalMessages;
     uniqueHashes = hashCountMap.size();
+    hashSpace = (int) Math.pow(2, 8 * hashLength);
 
     var sortedEntries = getSortedEntries(hashCountMap);
 
@@ -50,7 +52,7 @@ public class Statistics {
     System.out.println("\n=== СТАТИСТИКА ===\n");
 
     System.out.println("Всего сообщений: " + totalMessages);
-    System.out.println("Уникальных хешей: " + uniqueHashes);
+    System.out.println("Уникальных хешей: " + uniqueHashes + "/" + hashSpace);
     System.out.println();
     System.out.println("Макс. одинаковых хешей: " + maxCollisions);
     System.out.println("Мин. одинаковых хешей: " + minCollisions);
@@ -75,20 +77,32 @@ public class Statistics {
   /// Get statistics
 
   private void getHashStatistics(List<Map.Entry<String, AtomicInteger>> sortedEntries) {
-    for (int i = 0; i < sortedEntries.size() - 1; i++) {
+    int maxLength = Math.min(sortedEntries.size(), 5);
+
+    for (int i = 0; i < maxLength; i++) {
       mostRareHashes.add(sortedEntries.get(i).getKey());
 
       if (i < sortedEntries.size() - 1
           && sortedEntries.get(i).getValue().get() != sortedEntries.get(i + 1).getValue().get()) {
         break;
       }
+
+      if (i == maxLength - 1 && i != sortedEntries.size() - 2) {
+        mostRareHashes.add("etc...");
+      }
     }
 
-    for (int i = sortedEntries.size() - 1; i >= 0; i--) {
+    maxLength = Math.max(sortedEntries.size() - 5, 0);
+
+    for (int i = sortedEntries.size() - 1; i >= maxLength; i--) {
       mostFrequentHashes.add(sortedEntries.get(i).getKey());
 
       if (i > 0 && sortedEntries.get(i).getValue().get() != sortedEntries.get(i - 1).getValue().get()) {
         break;
+      }
+
+      if (i == maxLength && i != 0) {
+        mostFrequentHashes.add("etc...");
       }
     }
 

@@ -23,6 +23,8 @@ class GaloisHypergraphHashTest {
   private static final int MAX_MESSAGE_LEN = 1000;
   private static final int MESSAGES_COUNT = 100_000;
 
+  private static final int HASH_LENGTH = 1;
+
   private static final Map<String, AtomicInteger> hashCountMap = new ConcurrentHashMap<>();
   private static final AtomicInteger totalMessages = new AtomicInteger(0);
 
@@ -39,8 +41,8 @@ class GaloisHypergraphHashTest {
     );
 
     // EXECUTION
-    var hashAlg = new GaloisHypergraphHash(key);
-    var hashAlg2 = new GaloisHypergraphHash(key);
+    var hashAlg = new GaloisHypergraphHash(key, HASH_LENGTH);
+    var hashAlg2 = new GaloisHypergraphHash(key, HASH_LENGTH);
 
     var hash = hashAlg.hash(message);
     var repeatedHash = hashAlg.hash(message);
@@ -61,7 +63,7 @@ class GaloisHypergraphHashTest {
     );
 
     // EXECUTION
-    var hashAlg = new GaloisHypergraphHash(key);
+    var hashAlg = new GaloisHypergraphHash(key, HASH_LENGTH);
     var hash = hashAlg.hash(null);
 
     // ASSERTION
@@ -82,7 +84,7 @@ class GaloisHypergraphHashTest {
     );
 
     // EXECUTION
-    var hashAlg = new GaloisHypergraphHash(key);
+    var hashAlg = new GaloisHypergraphHash(key, HASH_LENGTH);
     var hash = hashAlg.hash(message);
 
     String hashString = bytesToHex(hash);
@@ -104,11 +106,13 @@ class GaloisHypergraphHashTest {
       return;
     }
 
-    var stats = new  Statistics(totalMessages.get(), hashCountMap);
+    var stats = new  Statistics(totalMessages.get(), HASH_LENGTH, hashCountMap);
 
     stats.print();
 
-    printSortedHashCountMap();
+    if (HASH_LENGTH == 1) {
+      printSortedHashCountMap();
+    }
   }
 
 

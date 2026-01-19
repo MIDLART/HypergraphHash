@@ -5,7 +5,7 @@ import org.hypergraph_hash.symmetric_encryption.enums.EncryptOrDecrypt;
 import org.hypergraph_hash.symmetric_encryption.enums.EncryptionMode;
 import org.hypergraph_hash.symmetric_encryption.enums.PackingMode;
 import org.hypergraph_hash.symmetric_encryption.modes.EncryptionModes;
-import org.hypergraph_hash.symmetric_encryption.modes.Packing;
+import org.hypergraph_hash.symmetric_encryption.modes.Padding;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -22,7 +22,7 @@ public class SymmetricAlgorithm {
   private final int blockSize;
 
   private final EncryptionModes encryptionModes;
-  private final Packing packing;
+  private final Padding padding;
 
   public SymmetricAlgorithm(SymmetricEncryption symmetricEncryption,
                             EncryptionMode encryptionMode,
@@ -30,7 +30,7 @@ public class SymmetricAlgorithm {
     blockSize = symmetricEncryption.getBlockSize();
 
     encryptionModes = new EncryptionModes(symmetricEncryption, encryptionMode);
-    packing = new Packing(blockSize, packingMode);
+    padding = new Padding(blockSize, packingMode);
   }
 
   public SymmetricAlgorithm(SymmetricEncryption symmetricEncryption,
@@ -48,7 +48,7 @@ public class SymmetricAlgorithm {
     blockSize = symmetricEncryption.getBlockSize();
 
     encryptionModes = new EncryptionModes(symmetricEncryption, encryptionMode, iv, delta);
-    packing = new Packing(blockSize, packingMode);
+    padding = new Padding(blockSize, packingMode);
   }
   
   public byte[] encrypt(byte[] input) {
@@ -70,7 +70,7 @@ public class SymmetricAlgorithm {
       throw new IllegalArgumentException("Output is too small");
     }
 
-    ReadBlock readBlock = new ArrayRead(input, blockSize, packing::fill);
+    ReadBlock readBlock = new ArrayRead(input, blockSize, padding::fill);
     WriteBlock writeBlock = new ArrayWrite(output, blockSize);
 
     encryptionModes.encryptionMode(readBlock, writeBlock, getBlockCount(inputLength, ENCRYPT), ENCRYPT);
@@ -80,7 +80,7 @@ public class SymmetricAlgorithm {
     fileErrorCheck(inputFile, outputFile);
     long inputLength = new File(inputFile).length();
 
-    ReadBlock readBlock = new FileRead(inputFile, blockSize, packing::fill);
+    ReadBlock readBlock = new FileRead(inputFile, blockSize, padding::fill);
     WriteBlock writeBlock = new FileWrite(outputFile, blockSize);
 
     encryptionModes.encryptionMode(readBlock, writeBlock, getBlockCount(inputLength, ENCRYPT), ENCRYPT);
@@ -96,7 +96,7 @@ public class SymmetricAlgorithm {
     }
 
     ReadBlock readBlock = new ArrayRead(input, blockSize);
-    WriteBlock writeBlock = new ArrayWrite(output, blockSize, packing::unpack);
+    WriteBlock writeBlock = new ArrayWrite(output, blockSize, padding::unpack);
 
     encryptionModes.encryptionMode(readBlock, writeBlock, getBlockCount(inputLength, DECRYPT), DECRYPT);
   }
@@ -112,7 +112,7 @@ public class SymmetricAlgorithm {
                     Collections.nCopies(getBlockCount(inputLength, DECRYPT), new byte[0])));
 
     ReadBlock readBlock = new ArrayRead(input, blockSize);
-    WriteBlock writeBlock = new ListWrite(outputList, blockSize, inputLength, packing::unpack);
+    WriteBlock writeBlock = new ListWrite(outputList, blockSize, inputLength, padding::unpack);
 
     encryptionModes.encryptionMode(readBlock, writeBlock, getBlockCount(inputLength, DECRYPT), DECRYPT);
 
@@ -124,7 +124,7 @@ public class SymmetricAlgorithm {
     long inputLength = new File(inputFile).length();
 
     ReadBlock readBlock = new FileRead(inputFile, blockSize);
-    WriteBlock writeBlock = new FileWrite(outputFile, blockSize, inputLength, packing::unpack);
+    WriteBlock writeBlock = new FileWrite(outputFile, blockSize, inputLength, padding::unpack);
 
     encryptionModes.encryptionMode(readBlock, writeBlock, getBlockCount(inputLength, DECRYPT), DECRYPT);
   }
@@ -145,7 +145,7 @@ public class SymmetricAlgorithm {
 
   private int getBlockCount(long length, EncryptOrDecrypt encryptOrDecrypt) {
     int blockCount = (int) (length / blockSize);
-    if (encryptOrDecrypt == ENCRYPT && packing.getMode() != PackingMode.NO) {
+    if (encryptOrDecrypt == ENCRYPT && padding.getMode() != PackingMode.NO) {
       blockCount++;
     }
 
