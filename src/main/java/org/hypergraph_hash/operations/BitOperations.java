@@ -72,6 +72,10 @@ public class BitOperations {
     return res & zeroMask(size);
   }
 
+  public static int leftRotation(int x, int y) {
+    return (int) leftRotation(x, y, 32);
+  }
+
   public static long rightRotation(long x, long y, int size) {
     y %= size;
 
@@ -81,6 +85,10 @@ public class BitOperations {
     }
 
     return res & zeroMask(size);
+  }
+
+  public static int rightRotation(int x, int y) {
+    return (int) rightRotation(x, y, 32);
   }
 
   public static long getBits(long x, int left, int right) {

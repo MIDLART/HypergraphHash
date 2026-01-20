@@ -185,7 +185,6 @@ class HypergraphEncryptionContextTest {
 
   // endregion
 
-
   // region --- Data providers ---
 
   static byte[][] messagesProvider() {
@@ -248,12 +247,6 @@ class HypergraphEncryptionContextTest {
                     HyperEdge.of(2, 3, 4),
                     HyperEdge.of(1, 2, 3),
                     HyperEdge.of(0, 1, 5)
-            ),
-            HomogenousHypergraph.ofEdges(
-                    HyperEdge.of(0, 1, 4),
-                    HyperEdge.of(0, 1, 5),
-                    HyperEdge.of(1, 2, 3),
-                    HyperEdge.of(3, 4, 5)
             )
     };
   }

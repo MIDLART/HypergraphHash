@@ -67,6 +67,29 @@ class HypergraphEncryptionTest {
     assertThat(actualMessage).containsExactly(expectedMessage);
   }
 
+  @Test
+  void zeroMessageTest() {
+    // SETUP
+    var key = HomogenousHypergraph.ofEdges(
+            HyperEdge.of(0, 3, 4),
+            HyperEdge.of(2, 3, 4),
+            HyperEdge.of(1, 2, 3),
+            HyperEdge.of(0, 1, 5)
+    );
+    byte[] message = new byte[] {(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00};
+
+    // EXECUTION
+    var encryptor = new HypergraphEncryption(key, 1);
+    byte[] encrypted = encryptor.encryption(message);
+    byte[] decrypted = encryptor.decryption(encrypted);
+
+    // ASSERTION
+    System.out.println("encrypted: " + Arrays.toString(encrypted));
+    System.out.println("decrypted: " + Arrays.toString(decrypted));
+    assertThat(encrypted).isNotEqualTo(message);
+    assertThat(decrypted).isEqualTo(message);
+  }
+
 
   static Stream<Arguments> argumentsProvider() {
     return Stream.of(
