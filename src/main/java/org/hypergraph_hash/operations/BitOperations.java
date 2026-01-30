@@ -1,5 +1,8 @@
 package org.hypergraph_hash.operations;
 
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 public class BitOperations {
   private BitOperations() {}
 
@@ -95,5 +98,37 @@ public class BitOperations {
     int leftShift = 63 - left;
 
     return x << (leftShift) >>> (right + leftShift);
+  }
+
+  public static byte[] bitChanging(byte[] arr, int i) {
+    byte[] res = new byte[arr.length];
+    System.arraycopy(arr, 0, res, 0, arr.length);
+
+    byte mask = (byte) (1 << i % 8);
+    res[arr.length - 1 - i / 8] ^= mask;
+
+    return res;
+  }
+
+  public static int bitCount(byte[] arr) {
+    int count = 0;
+
+    for (byte b : arr) {
+      count += Integer.bitCount(b & 0xFF);
+    }
+
+    return count;
+  }
+
+  public static int differentBitsCount(byte[] arr1, byte[] arr2) {
+    return bitCount(xor(arr1, arr2));
+  }
+
+  public static String bytesToBinary(byte[] bytes) {
+    return IntStream.range(0, bytes.length)
+            .mapToObj(i -> String.format("%8s",
+                            Integer.toBinaryString(bytes[i] & 0xFF))
+                    .replace(' ', '0'))
+            .collect(Collectors.joining(" "));
   }
 }

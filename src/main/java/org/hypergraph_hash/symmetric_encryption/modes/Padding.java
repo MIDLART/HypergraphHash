@@ -1,7 +1,7 @@
 package org.hypergraph_hash.symmetric_encryption.modes;
 
 import lombok.Getter;
-import org.hypergraph_hash.symmetric_encryption.enums.PackingMode;
+import org.hypergraph_hash.symmetric_encryption.enums.PaddingMode;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -9,9 +9,9 @@ import java.util.Arrays;
 public class Padding {
   private final int size;
   @Getter
-  private final PackingMode mode;
+  private final PaddingMode mode;
 
-  public Padding(int blockSize, PackingMode mode) {
+  public Padding(int blockSize, PaddingMode mode) {
     size = blockSize;
     this.mode = mode;
   }

@@ -23,9 +23,10 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hypergraph_hash.utilities.CryptoUtilities.getHashIV;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.hypergraph_hash.symmetric_encryption.enums.EncryptionMode.*;
-import static org.hypergraph_hash.symmetric_encryption.enums.PackingMode.*;
+import static org.hypergraph_hash.symmetric_encryption.enums.PaddingMode.*;
 
 class HypergraphEncryptionContextTest {
   private static final String TEST_DIRECTORY = "src/test/resources/HypergraphEncryptionTest";
@@ -54,11 +55,11 @@ class HypergraphEncryptionContextTest {
   }
 
   @ParameterizedTest
-  @MethodSource("messageKeyInitVectorProvider")
-  void testCBCCycle(byte[] message, HomogenousHypergraph key, byte[] initVector) {
+  @MethodSource("messageKeyBlockProvider")
+  void testCBCCycle(byte[] message, HomogenousHypergraph key, int smallBlockSize) {
     // EXECUTION
-    var cryptoSystem = new HypergraphEncryption(key, initVector.length / Byte.SIZE);
-    var cryptoContext = new SymmetricAlgorithm(cryptoSystem, CBC, ZEROS, initVector);
+    var cryptoSystem = new HypergraphEncryption(key, smallBlockSize);
+    var cryptoContext = new SymmetricAlgorithm(cryptoSystem, CBC, ZEROS);
 
     byte[] decryptedMessage = cryptoContext.decrypt(cryptoContext.encrypt(message));
 
@@ -68,11 +69,11 @@ class HypergraphEncryptionContextTest {
   }
 
   @ParameterizedTest
-  @MethodSource("messageKeyInitVectorProvider")
-  void testPCBCCycle(byte[] message, HomogenousHypergraph key, byte[] initVector) {
+  @MethodSource("messageKeyBlockProvider")
+  void testPCBCCycle(byte[] message, HomogenousHypergraph key, int smallBlockSize) {
     // EXECUTION
-    var cryptoSystem = new HypergraphEncryption(key, initVector.length / Byte.SIZE);
-    var cryptoContext = new SymmetricAlgorithm(cryptoSystem, PCBC, ZEROS, initVector);
+    var cryptoSystem = new HypergraphEncryption(key, smallBlockSize);
+    var cryptoContext = new SymmetricAlgorithm(cryptoSystem, PCBC, ZEROS);
 
     byte[] decryptedMessage = cryptoContext.decrypt(cryptoContext.encrypt(message));
 
@@ -82,11 +83,11 @@ class HypergraphEncryptionContextTest {
   }
 
   @ParameterizedTest
-  @MethodSource("messageKeyInitVectorProvider")
-  void testCFBCycle(byte[] message, HomogenousHypergraph key, byte[] initVector) {
+  @MethodSource("messageKeyBlockProvider")
+  void testCFBCycle(byte[] message, HomogenousHypergraph key, int smallBlockSize) {
     // EXECUTION
-    var cryptoSystem = new HypergraphEncryption(key, initVector.length / Byte.SIZE);
-    var cryptoContext = new SymmetricAlgorithm(cryptoSystem, CFB, ZEROS, initVector);
+    var cryptoSystem = new HypergraphEncryption(key, smallBlockSize);
+    var cryptoContext = new SymmetricAlgorithm(cryptoSystem, CFB, ZEROS);
 
     byte[] decryptedMessage = cryptoContext.decrypt(cryptoContext.encrypt(message));
 
@@ -96,11 +97,11 @@ class HypergraphEncryptionContextTest {
   }
 
   @ParameterizedTest
-  @MethodSource("messageKeyInitVectorProvider")
-  void testOFBCycle(byte[] message, HomogenousHypergraph key, byte[] initVector) {
+  @MethodSource("messageKeyBlockProvider")
+  void testOFBCycle(byte[] message, HomogenousHypergraph key, int smallBlockSize) {
     // EXECUTION
-    var cryptoSystem = new HypergraphEncryption(key, initVector.length / Byte.SIZE);
-    var cryptoContext = new SymmetricAlgorithm(cryptoSystem, OFB, ZEROS, initVector);
+    var cryptoSystem = new HypergraphEncryption(key, smallBlockSize);
+    var cryptoContext = new SymmetricAlgorithm(cryptoSystem, OFB, ZEROS);
 
     byte[] decryptedMessage = cryptoContext.decrypt(cryptoContext.encrypt(message));
 
@@ -110,11 +111,11 @@ class HypergraphEncryptionContextTest {
   }
 
   @ParameterizedTest
-  @MethodSource("messageKeyInitVectorProvider")
-  void testCTRCycle(byte[] message, HomogenousHypergraph key, byte[] initVector) {
+  @MethodSource("messageKeyBlockProvider")
+  void testCTRCycle(byte[] message, HomogenousHypergraph key, int smallBlockSize) {
     // EXECUTION
-    var cryptoSystem = new HypergraphEncryption(key, initVector.length / Byte.SIZE);
-    var cryptoContext = new SymmetricAlgorithm(cryptoSystem, CTR, ZEROS, initVector);
+    var cryptoSystem = new HypergraphEncryption(key, smallBlockSize);
+    var cryptoContext = new SymmetricAlgorithm(cryptoSystem, CTR, ZEROS);
 
     byte[] decryptedMessage = cryptoContext.decrypt(cryptoContext.encrypt(message));
 
@@ -123,12 +124,12 @@ class HypergraphEncryptionContextTest {
   }
 
   @ParameterizedTest
-  @MethodSource("messageKeyInitVectorDeltaProvider")
-  void testRDCycle(byte[] message, HomogenousHypergraph key, byte[] initVector, BigInteger delta) {
+  @MethodSource("messageKeyDeltaProvider")
+  void testRDCycle(byte[] message, HomogenousHypergraph key, int smallBlockSize, BigInteger delta) {
     // EXECUTION
-    var cryptoSystem = new HypergraphEncryption(key, initVector.length / Byte.SIZE);
+    var cryptoSystem = new HypergraphEncryption(key, smallBlockSize);
     var cryptoContext = new SymmetricAlgorithm(
-            cryptoSystem, RD, ZEROS, initVector, delta);
+            cryptoSystem, RD, ZEROS, getHashIV(smallBlockSize * key.getVerticesCount()), delta);
 
     byte[] decryptedMessage = cryptoContext.decrypt(cryptoContext.encrypt(message));
 
@@ -145,15 +146,14 @@ class HypergraphEncryptionContextTest {
   void testTextFileCycle() throws IOException {
     // SETUP
     HomogenousHypergraph key = keysProvider()[0];
-    byte[] initVector = initVectorsProvider()[0];
 
     String in = TEST_DIRECTORY + "/allocator_red_black_tree_tests.cpp";
     String encOut = TEST_DIRECTORY + "/encryptedAllocRBTTests";
     String decOut = TEST_DIRECTORY + "/decryptedAllocRBTTests.cpp";
 
     // EXECUTION
-    var cryptoSystem = new HypergraphEncryption(key, initVector.length / Byte.SIZE);
-    var cryptoContext = new SymmetricAlgorithm(cryptoSystem, PCBC, PKCS7, initVector);
+    var cryptoSystem = new HypergraphEncryption(key, 1);
+    var cryptoContext = new SymmetricAlgorithm(cryptoSystem, PCBC, PKCS7);
 
     cryptoContext.encrypt(in, encOut);
     cryptoContext.decrypt(encOut, decOut);
@@ -166,15 +166,14 @@ class HypergraphEncryptionContextTest {
   void testPictureFileCycle() throws IOException {
     // SETUP
     HomogenousHypergraph key = keysProvider()[0];
-    byte[] initVector = initVectorsProvider()[0];
 
     String in = TEST_DIRECTORY + "/picture.jpg";
     String encOut = TEST_DIRECTORY + "/encryptedPicture";
     String decOut = TEST_DIRECTORY + "/decryptedPicture.jpg";
 
     // EXECUTION
-    var cryptoSystem = new HypergraphEncryption(key, initVector.length / Byte.SIZE);
-    var cryptoContext = new SymmetricAlgorithm(cryptoSystem, CTR, ANSIX923, initVector);
+    var cryptoSystem = new HypergraphEncryption(key, 1);
+    var cryptoContext = new SymmetricAlgorithm(cryptoSystem, CTR, ANSIX923);
 
     cryptoContext.encrypt(in, encOut);
     cryptoContext.decrypt(encOut, decOut);
@@ -247,6 +246,50 @@ class HypergraphEncryptionContextTest {
                     HyperEdge.of(2, 3, 4),
                     HyperEdge.of(1, 2, 3),
                     HyperEdge.of(0, 1, 5)
+            ),
+            HomogenousHypergraph.ofEdges(
+                    HyperEdge.of(0, 1, 7),
+                    HyperEdge.of(1, 6, 5),
+                    HyperEdge.of(2, 0, 3),
+                    HyperEdge.of(3, 7, 5),
+                    HyperEdge.of(4, 5, 6),
+                    HyperEdge.of(5, 0, 1),
+                    HyperEdge.of(6, 2, 3),
+                    HyperEdge.of(7, 4, 2)
+            ),
+            HomogenousHypergraph.ofEdges(
+                    HyperEdge.of(0, 1, 7),
+                    HyperEdge.of(1, 8, 5),
+                    HyperEdge.of(2, 10, 3),
+                    HyperEdge.of(3, 7, 31),
+                    HyperEdge.of(4, 5, 6),
+                    HyperEdge.of(5, 25, 1),
+                    HyperEdge.of(6, 2, 9),
+                    HyperEdge.of(7, 4, 2),
+                    HyperEdge.of(8, 22, 1),
+                    HyperEdge.of(9, 6, 8),
+                    HyperEdge.of(10, 7, 9),
+                    HyperEdge.of(11, 0, 15),
+                    HyperEdge.of(12, 13, 2),
+                    HyperEdge.of(13, 11, 14),
+                    HyperEdge.of(14, 22, 3),
+                    HyperEdge.of(15, 5, 9),
+                    HyperEdge.of(16, 10, 22),
+                    HyperEdge.of(17, 12, 19),
+                    HyperEdge.of(18, 3, 25),
+                    HyperEdge.of(19, 16, 28),
+                    HyperEdge.of(20, 7, 31),
+                    HyperEdge.of(21, 9, 14),
+                    HyperEdge.of(22, 18, 27),
+                    HyperEdge.of(23, 4, 30),
+                    HyperEdge.of(24, 11, 26),
+                    HyperEdge.of(25, 8, 21),
+                    HyperEdge.of(26, 15, 29),
+                    HyperEdge.of(27, 6, 20),
+                    HyperEdge.of(28, 13, 23),
+                    HyperEdge.of(29, 17, 24),
+                    HyperEdge.of(30, 0, 31),
+                    HyperEdge.of(31, 19, 25)
             )
     };
   }
@@ -267,39 +310,6 @@ class HypergraphEncryptionContextTest {
     };
   }
 
-  static byte[][] initVectorsProvider() {
-    return new byte[][] {
-            {
-              (byte) 0xDE, (byte) 0x73, (byte) 0x23, (byte) 0x5A, (byte) 0x5B, (byte) 0x52, (byte) 0x8F, (byte) 0x8B,
-            },
-            {
-              (byte) 0x89, (byte) 0x01, (byte) 0x37, (byte) 0x23, (byte) 0xA0, (byte) 0xB1, (byte) 0x99, (byte) 0xE4,
-              (byte) 0xDE, (byte) 0x73, (byte) 0x23, (byte) 0x5A, (byte) 0x5B, (byte) 0x52, (byte) 0x8F, (byte) 0x8B,
-            },
-            {
-              (byte) 0xB3, (byte) 0x58, (byte) 0x98, (byte) 0x6D, (byte) 0xA4, (byte) 0xAB, (byte) 0xD7, (byte) 0x5C,
-              (byte) 0x13, (byte) 0x48, (byte) 0x67, (byte) 0x68, (byte) 0x34, (byte) 0x90, (byte) 0x53, (byte) 0xD4,
-            },
-            {
-              (byte) 0x9C, (byte) 0xBD, (byte) 0xE5, (byte) 0x4F, (byte) 0x3F, (byte) 0xC6, (byte) 0x14, (byte) 0x87,
-              (byte) 0xF9, (byte) 0xDB, (byte) 0xB2, (byte) 0x46, (byte) 0x14, (byte) 0xEB, (byte) 0xEA, (byte) 0x48,
-              (byte) 0x25, (byte) 0xA1, (byte) 0x14, (byte) 0x82, (byte) 0x13, (byte) 0x28, (byte) 0xC2, (byte) 0x06,
-              (byte) 0x4D, (byte) 0x0C, (byte) 0x60, (byte) 0x18, (byte) 0x0B, (byte) 0x9D, (byte) 0x77, (byte) 0x37,
-            },
-            {
-              (byte) 0x25, (byte) 0xA1, (byte) 0x14, (byte) 0x82, (byte) 0x13, (byte) 0x28, (byte) 0xC2, (byte) 0x06,
-              (byte) 0x4D, (byte) 0x0C, (byte) 0x60, (byte) 0x18, (byte) 0x0B, (byte) 0x9D, (byte) 0x77, (byte) 0x37,
-              (byte) 0x89, (byte) 0x01, (byte) 0x37, (byte) 0x23, (byte) 0xA0, (byte) 0xB1, (byte) 0x99, (byte) 0xE4,
-              (byte) 0xDE, (byte) 0x73, (byte) 0x23, (byte) 0x5A, (byte) 0x5B, (byte) 0x52, (byte) 0x8F, (byte) 0x8B,
-              (byte) 0xB3, (byte) 0x58, (byte) 0x98, (byte) 0x6D, (byte) 0xA4, (byte) 0xAB, (byte) 0xD7, (byte) 0x5C,
-              (byte) 0x13, (byte) 0x48, (byte) 0x67, (byte) 0x68, (byte) 0x34, (byte) 0x90, (byte) 0x53, (byte) 0xD4,
-              (byte) 0x9C, (byte) 0xBD, (byte) 0xE5, (byte) 0x4F, (byte) 0x3F, (byte) 0xC6, (byte) 0x14, (byte) 0x87,
-              (byte) 0xF9, (byte) 0xDB, (byte) 0xB2, (byte) 0x46, (byte) 0x14, (byte) 0xEB, (byte) 0xEA, (byte) 0x48,
-            }
-    };
-  }
-
-
   static Stream<Arguments> messageKeyBlockProvider() {
     return Arrays.stream(messagesProvider())
             .flatMap(message -> Arrays.stream(keysProvider())
@@ -307,28 +317,14 @@ class HypergraphEncryptionContextTest {
                             .mapToObj(block -> Arguments.of(message, key, block))));
   }
 
-  static Stream<Arguments> messageKeyInitVectorProvider() {
+  static Stream<Arguments> messageKeyDeltaProvider() {
     List<Arguments> args = new ArrayList<>();
 
     for (byte[] message : messagesProvider()) {
       for (HomogenousHypergraph key : keysProvider()) {
-        for (byte[] iv : initVectorsProvider()) {
-          args.add(Arguments.of(message, key, iv));
-        }
-      }
-    }
-
-    return args.stream();
-  }
-
-  static Stream<Arguments> messageKeyInitVectorDeltaProvider() {
-    List<Arguments> args = new ArrayList<>();
-
-    for (byte[] message : messagesProvider()) {
-      for (HomogenousHypergraph key : keysProvider()) {
-        for (byte[] iv : initVectorsProvider()) {
+        for (int smallBlockSize : smallBlockSizeProvider()) {
           for (BigInteger delta : deltasProvider()) {
-            args.add(Arguments.of(message, key, iv, delta));
+            args.add(Arguments.of(message, key, smallBlockSize, delta));
           }
         }
       }

@@ -1,4 +1,4 @@
-package org.hypergraph_hash.hypergraph.transform.hash.tables;
+package org.hypergraph_hash.tables;
 
 public class SBox {
   private SBox() {}

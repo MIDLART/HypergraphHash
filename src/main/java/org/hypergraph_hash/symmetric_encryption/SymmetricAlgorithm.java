@@ -3,7 +3,7 @@ package org.hypergraph_hash.symmetric_encryption;
 import org.hypergraph_hash.symmetric_encryption.block.*;
 import org.hypergraph_hash.symmetric_encryption.enums.EncryptOrDecrypt;
 import org.hypergraph_hash.symmetric_encryption.enums.EncryptionMode;
-import org.hypergraph_hash.symmetric_encryption.enums.PackingMode;
+import org.hypergraph_hash.symmetric_encryption.enums.PaddingMode;
 import org.hypergraph_hash.symmetric_encryption.modes.EncryptionModes;
 import org.hypergraph_hash.symmetric_encryption.modes.Padding;
 
@@ -26,29 +26,29 @@ public class SymmetricAlgorithm {
 
   public SymmetricAlgorithm(SymmetricEncryption symmetricEncryption,
                             EncryptionMode encryptionMode,
-                            PackingMode packingMode) {
+                            PaddingMode paddingMode) {
     blockSize = symmetricEncryption.getBlockSize();
 
     encryptionModes = new EncryptionModes(symmetricEncryption, encryptionMode);
-    padding = new Padding(blockSize, packingMode);
+    padding = new Padding(blockSize, paddingMode);
   }
 
   public SymmetricAlgorithm(SymmetricEncryption symmetricEncryption,
                             EncryptionMode encryptionMode,
-                            PackingMode packingMode,
+                            PaddingMode paddingMode,
                             byte[] iv) {
-    this(symmetricEncryption, encryptionMode, packingMode, iv, BigInteger.ONE);
+    this(symmetricEncryption, encryptionMode, paddingMode, iv, BigInteger.ONE);
   }
 
   public SymmetricAlgorithm(SymmetricEncryption symmetricEncryption,
                             EncryptionMode encryptionMode,
-                            PackingMode packingMode,
+                            PaddingMode paddingMode,
                             byte[] iv,
                             BigInteger delta) {
     blockSize = symmetricEncryption.getBlockSize();
 
     encryptionModes = new EncryptionModes(symmetricEncryption, encryptionMode, iv, delta);
-    padding = new Padding(blockSize, packingMode);
+    padding = new Padding(blockSize, paddingMode);
   }
   
   public byte[] encrypt(byte[] input) {
@@ -145,7 +145,7 @@ public class SymmetricAlgorithm {
 
   private int getBlockCount(long length, EncryptOrDecrypt encryptOrDecrypt) {
     int blockCount = (int) (length / blockSize);
-    if (encryptOrDecrypt == ENCRYPT && padding.getMode() != PackingMode.NO) {
+    if (encryptOrDecrypt == ENCRYPT && padding.getMode() != PaddingMode.NO) {
       blockCount++;
     }
 

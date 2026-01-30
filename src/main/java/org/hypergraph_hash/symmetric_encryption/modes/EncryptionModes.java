@@ -13,6 +13,7 @@ import java.util.stream.IntStream;
 
 import static org.hypergraph_hash.symmetric_encryption.enums.EncryptOrDecrypt.ENCRYPT;
 import static org.hypergraph_hash.operations.BitOperations.xor;
+import static org.hypergraph_hash.utilities.Validation.validateEquals;
 
 public class EncryptionModes {
   private final SymmetricEncryption symmetricEncryption;
@@ -32,6 +33,8 @@ public class EncryptionModes {
     this.encryptionMode = encryptionMode;
     blockSize = symmetricEncryption.getBlockSize();
     rd = delta;
+
+    validateEquals(iv.length, blockSize, "iv.length", "blockSize");
 
     this.iv = new byte[blockSize];
     System.arraycopy(iv, 0, this.iv, 0, blockSize);

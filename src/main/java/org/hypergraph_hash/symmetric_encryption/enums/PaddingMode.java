@@ -1,6 +1,6 @@
 package org.hypergraph_hash.symmetric_encryption.enums;
 
-public enum PackingMode {
+public enum PaddingMode {
   ZEROS,
   ANSIX923,
   PKCS7,

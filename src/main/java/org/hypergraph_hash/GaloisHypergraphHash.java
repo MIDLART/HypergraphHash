@@ -2,7 +2,7 @@ package org.hypergraph_hash;
 
 import org.hypergraph_hash.hypergraph.HomogenousHypergraph;
 import org.hypergraph_hash.hypergraph.transform.hash.GaloisHypergraphTransform;
-import org.hypergraph_hash.hypergraph.transform.hash.tables.SBox;
+import org.hypergraph_hash.tables.SBox;
 import org.hypergraph_hash.operations.GaloisFieldOperations;
 
 import static org.hypergraph_hash.hypergraph.transform.hash.GaloisHypergraphTransform.GF8_IRREDUCIBLE;

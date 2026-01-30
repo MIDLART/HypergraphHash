@@ -4,7 +4,7 @@ import org.hypergraph_hash.symmetric_encryption.block.ArrayRead;
 import org.hypergraph_hash.symmetric_encryption.block.ReadBlock;
 import org.hypergraph_hash.symmetric_encryption.modes.Padding;
 
-import static org.hypergraph_hash.symmetric_encryption.enums.PackingMode.NO;
+import static org.hypergraph_hash.symmetric_encryption.enums.PaddingMode.NO;
 import static org.hypergraph_hash.utilities.CryptoUtilities.getHashIV;
 
 public abstract class MerkleDamgardConstruction implements CryptographicHash {

@@ -31,7 +31,7 @@ public abstract class HypergraphTransform implements BlockTransform {
   }
 
   @Override
-  public final byte[] encryption(byte[] text) {
+  public byte[] encryption(byte[] text) {
     return validateAndTransform(text, IntUnaryOperator.identity());
   }
 
