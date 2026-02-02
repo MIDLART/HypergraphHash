@@ -5,11 +5,12 @@ import org.hypergraph_hash.hypergraph.transform.hash.GaloisHypergraphTransform;
 import org.hypergraph_hash.tables.SBox;
 import org.hypergraph_hash.operations.GaloisFieldOperations;
 
-import static org.hypergraph_hash.hypergraph.transform.hash.GaloisHypergraphTransform.GF8_IRREDUCIBLE;
 import static org.hypergraph_hash.hypergraph.transform.hash.GaloisHypergraphTransform.GF8_SIZE;
 import static org.hypergraph_hash.operations.BitOperations.*;
 
 public class GaloisHypergraphHash extends MerkleDamgardConstruction {
+  public static final int GF8_IRREDUCIBLE = 0x1A9;
+
   public GaloisHypergraphHash(HomogenousHypergraph key, int hashLength) {
     super(new GaloisHypergraphTransform(key), hashLength);
   }
@@ -19,8 +20,8 @@ public class GaloisHypergraphHash extends MerkleDamgardConstruction {
     byte[] res = blockTransform.encryption(inputBlock);
 
     for (int i = 0; i < prevHash.length; i++) {
-      int a = res[i];
-      int b = prevHash[i];
+      int a = SBox.getKuznyechik(res[i] & 0xFF);
+      int b = SBox.getCamellia(prevHash[i] & 0xFF);
 
       if (a == 0) {
         a = zeroReplacement(i, b, prevHash.length);

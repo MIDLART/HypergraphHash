@@ -22,6 +22,8 @@ import static org.hypergraph_hash.operations.BitOperations.differentBitsCount;
 class GaloisHypergraphHashTest {
   private static final Random random = new Random();
 
+  private static final boolean DETAILED_PRINT = false;
+
   private static final int MAX_MESSAGE_LEN = 1000;
   private static final int MESSAGES_COUNT = 100_000;
 
@@ -148,33 +150,35 @@ class GaloisHypergraphHashTest {
     var hashAlg = new GaloisHypergraphHash(key, 32);
     var hash = hashAlg.hash(message);
 
-//    var encryptionAlg = new SymmetricAlgorithm(new HypergraphEncryption(key, 1), PCBC, ANSIX923);
-//    var encryption = encryptionAlg.encrypt(message);
-
     double hashPercentSum = 0;
-    double encryptionPercentSum = 0;
+    int outlierCount = 0;
+    int criticalOutlierCount = 0;
 
     for (int i = 0; i < message.length * 8; i++) {
       byte[] bitChanged = bitChanging(message, i);
 
       int differentBits = differentBitsCount(hash, hashAlg.hash(bitChanged));
       double percent = (double) differentBits / (hash.length * 8) * 100;
-      if (percent < 40) System.out.print("!!!{" + i + "}");
-      System.out.println("hash: " + (int) percent + "%");
+      if (percent < 40) {
+        outlierCount++;
+        if (percent < 35) criticalOutlierCount++;
 
-//      int differentBitsEncryption = differentBitsCount(encryption, encryptionAlg.encrypt(bitChanged));
-//      double percentEncryption = (double) differentBitsEncryption / (encryption.length * 8) * 100;
-//      System.out.println("encryption: " + (int) percentEncryption + "%");
+        detailPrint("!!!{" + i + "}");
+      }
+      detailPrintln("hash: " + (int) percent + "%");
 
       hashPercentSum += percent;
-//      encryptionPercentSum += percentEncryption;
     }
 
     // ASSERTION
     double averagePercent = hashPercentSum / (message.length * 8);
     System.out.println("Average percent: " + averagePercent);
-    assertThat(hashPercentSum).isGreaterThan(encryptionPercentSum);
-    assertThat(averagePercent).isGreaterThan(48);
+    System.out.println("Outlier count(<40%): " + outlierCount);
+    System.out.println("Critical outlier count(<35%): " + criticalOutlierCount);
+
+    assertThat(averagePercent).isGreaterThan(49);
+    assertThat(criticalOutlierCount).isZero();
+    assertThat(outlierCount).isLessThan(message.length * 8 / 100);
   }
 
 
@@ -190,7 +194,7 @@ class GaloisHypergraphHashTest {
 
     stats.print();
 
-    if (HASH_LENGTH == 1) {
+    if (DETAILED_PRINT) {
       printSortedHashCountMap();
     }
   }
@@ -240,6 +244,18 @@ class GaloisHypergraphHashTest {
 
     for (var entry : sortedEntries) {
       System.out.println(entry.getKey() + ": " + entry.getValue());
+    }
+  }
+
+  private static void detailPrint(String message) {
+    if (DETAILED_PRINT) {
+      System.out.print(message);
+    }
+  }
+
+  private static void detailPrintln(String message) {
+    if (DETAILED_PRINT) {
+      System.out.println(message);
     }
   }
 
