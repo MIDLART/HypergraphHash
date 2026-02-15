@@ -1,6 +1,5 @@
 package org.hypergraph_hash.hypergraph.transform;
 
-import org.hypergraph_hash.BlockTransform;
 import org.hypergraph_hash.hypergraph.HomogenousHypergraph;
 
 import java.util.Arrays;

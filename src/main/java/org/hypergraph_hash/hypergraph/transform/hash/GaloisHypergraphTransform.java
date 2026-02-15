@@ -2,23 +2,20 @@ package org.hypergraph_hash.hypergraph.transform.hash;
 
 import org.hypergraph_hash.hypergraph.HomogenousHypergraph;
 import org.hypergraph_hash.hypergraph.transform.HypergraphTransform;
-import org.hypergraph_hash.tables.SBox;
+import org.hypergraph_hash.tables.Irreducible;
 import org.hypergraph_hash.operations.GaloisFieldOperations;
 
 import java.util.function.IntUnaryOperator;
 
 import static org.hypergraph_hash.operations.BitOperations.*;
+import static org.hypergraph_hash.operations.GaloisFieldOperations.GF8_SIZE;
+import static org.hypergraph_hash.tables.SBox.getSBox;
 
 public class GaloisHypergraphTransform extends HypergraphTransform {
-  public static final int GF8_SIZE = 256;
-  public static final int GF8_IRREDUCIBLE = 0x11B;
+  private final int gf8Irreducible;
 
   private final int edgeDimension; // k
   private final int verticesCount; // n
-
-//  public GaloisHypergraphTransform(HomogenousHypergraph key, int smallBlockSize) {
-//    super(key, smallBlockSize);
-//  }
 
   /// GF8
   public GaloisHypergraphTransform(HomogenousHypergraph key) {
@@ -26,6 +23,8 @@ public class GaloisHypergraphTransform extends HypergraphTransform {
 
     edgeDimension = key.getEdgeDimension();
     verticesCount = key.getVerticesCount();
+
+    gf8Irreducible = Irreducible.getGF8((edgeDimension + 27) % 30);
   }
 
   @Override
@@ -36,7 +35,6 @@ public class GaloisHypergraphTransform extends HypergraphTransform {
     );
   }
 
-  //TODO для GF8 можно обойтись без массива. Можно расширить и для других с помощью int/long
   @Override
   protected byte[] transform(byte[] text, IntUnaryOperator vertexSelector) {
     for (int vertex = 0; vertex < hypergraphAdjacencyLists.length; vertex++) {
@@ -51,13 +49,13 @@ public class GaloisHypergraphTransform extends HypergraphTransform {
 
       for (int adjacentVertex : hypergraphAdjacencyLists[vertex]) {
         int blockIndex = vertexSelector.applyAsInt(adjacentVertex);
-        smallBlock = SBox.getAES((text[blockIndex]) & 0xFF);
+        smallBlock = getSBox(edgeDimension, (text[blockIndex]) & 0xFF);
 
         if (smallBlock == 0) {
           smallBlock = zeroReplacement(vertex, adjacentVertex);
         }
 
-        val = GaloisFieldOperations.mult(val, smallBlock, GF8_IRREDUCIBLE, GF8_SIZE);
+        val = GaloisFieldOperations.mult(val, smallBlock, gf8Irreducible, GF8_SIZE);
       }
 
       smallBlock = text[curVertexBlockIndex] & 0xFF;
@@ -65,7 +63,7 @@ public class GaloisHypergraphTransform extends HypergraphTransform {
         smallBlock = zeroReplacement(vertex + edgeDimension, vertex);
       }
 
-      text[curVertexBlockIndex] = (byte) GaloisFieldOperations.mult(val, smallBlock, GF8_IRREDUCIBLE, GF8_SIZE);
+      text[curVertexBlockIndex] = (byte) GaloisFieldOperations.mult(val, smallBlock, gf8Irreducible, GF8_SIZE);
 
       for (int adjacentVertex : hypergraphAdjacencyLists[vertex]) {
         int blockIndex = vertexSelector.applyAsInt(adjacentVertex);
@@ -75,7 +73,7 @@ public class GaloisHypergraphTransform extends HypergraphTransform {
           smallBlock = zeroReplacement(vertex, adjacentVertex);
         }
 
-        text[blockIndex] = (byte) GaloisFieldOperations.mult(val, smallBlock, GF8_IRREDUCIBLE, GF8_SIZE);
+        text[blockIndex] = (byte) GaloisFieldOperations.mult(val, smallBlock, gf8Irreducible, GF8_SIZE);
       }
     }
 
@@ -90,10 +88,10 @@ public class GaloisHypergraphTransform extends HypergraphTransform {
             ^ leftRotation(i * edgeDimension, edgeDimension)
             ^ rightRotation(j, edgeDimension - 1);
 
-    int replacement = SBox.getAES(input & 0xFF);
+    int replacement = getSBox(edgeDimension, input & 0xFF);
 
     if (replacement == 0) {
-      replacement = SBox.getAES((
+      replacement = getSBox(edgeDimension, (
               rightRotation(input, i * j * edgeDimension + 1) ^ leftRotation(input, i + j + 1)) & 0xFF);
     }
 

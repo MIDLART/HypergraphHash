@@ -1,4 +1,4 @@
-package org.hypergraph_hash.testHash;
+package org.hypergraph_hash.test_hash;
 
 import org.hypergraph_hash.GaloisHypergraphHash;
 import org.hypergraph_hash.hypergraph.HomogenousHypergraph;
@@ -223,7 +223,7 @@ class GaloisHypergraphHashTest {
     StringBuilder hexString = new StringBuilder(2 * bytes.length);
 
     for (byte b : bytes) {
-      String hex = Integer.toHexString(0xFF & b);
+      String hex = Integer.toHexString(b & 0xFF);
 
       if (hex.length() == 1) {
         hexString.append('0');

@@ -119,4 +119,13 @@ public class SBox {
   public static int getCamellia(int index) {
     return CAMELLIA_S_BOX[index] & 0xFF;
   }
+
+  public static int getSBox(int indSBox, int index) {
+    return switch (indSBox % 3) {
+      case 0 -> AES_S_BOX[index] & 0xFF;
+      case 1 -> KUZNYECHIK_S_BOX[index] & 0xFF;
+      case 2 -> CAMELLIA_S_BOX[index] & 0xFF;
+      default -> AES_S_BOX[index] & 0xFF;
+    };
+  }
 }

@@ -2,17 +2,23 @@ package org.hypergraph_hash;
 
 import org.hypergraph_hash.hypergraph.HomogenousHypergraph;
 import org.hypergraph_hash.hypergraph.transform.hash.GaloisHypergraphTransform;
-import org.hypergraph_hash.tables.SBox;
+import org.hypergraph_hash.tables.Irreducible;
 import org.hypergraph_hash.operations.GaloisFieldOperations;
 
-import static org.hypergraph_hash.hypergraph.transform.hash.GaloisHypergraphTransform.GF8_SIZE;
 import static org.hypergraph_hash.operations.BitOperations.*;
+import static org.hypergraph_hash.operations.GaloisFieldOperations.GF8_SIZE;
+import static org.hypergraph_hash.tables.SBox.getSBox;
 
 public class GaloisHypergraphHash extends MerkleDamgardConstruction {
-  public static final int GF8_IRREDUCIBLE = 0x1A9;
+  private final int gf8Irreducible;
+
+  private final int edgeDimension; // k
 
   public GaloisHypergraphHash(HomogenousHypergraph key, int hashLength) {
     super(new GaloisHypergraphTransform(key), hashLength);
+
+    edgeDimension = key.getEdgeDimension();
+    gf8Irreducible = Irreducible.getGF8((edgeDimension + 16) % 30);
   }
 
   @Override
@@ -20,8 +26,8 @@ public class GaloisHypergraphHash extends MerkleDamgardConstruction {
     byte[] res = blockTransform.encryption(inputBlock);
 
     for (int i = 0; i < prevHash.length; i++) {
-      int a = SBox.getKuznyechik(res[i] & 0xFF);
-      int b = SBox.getCamellia(prevHash[i] & 0xFF);
+      int a = getSBox(edgeDimension + 1, res[i] & 0xFF);
+      int b = getSBox(edgeDimension + 2, prevHash[i] & 0xFF);
 
       if (a == 0) {
         a = zeroReplacement(i, b, prevHash.length);
@@ -31,7 +37,7 @@ public class GaloisHypergraphHash extends MerkleDamgardConstruction {
         b = zeroReplacement(i, a, prevHash.length);
       }
 
-      res[i] = (byte) GaloisFieldOperations.mult(a, b, GF8_IRREDUCIBLE, GF8_SIZE);
+      res[i] = (byte) GaloisFieldOperations.mult(a, b, gf8Irreducible, GF8_SIZE);
     }
 
     return res;
@@ -59,10 +65,11 @@ public class GaloisHypergraphHash extends MerkleDamgardConstruction {
     int shift = (i ^ other ^ len) & 7;
     int rotated = leftRotation(other, shift);
     int input = ((i + 1) * len) ^ rotated ^ i;
-    int replacement = SBox.getKuznyechik(input & 0xFF);
+    int replacement = getSBox(edgeDimension + 1, input & 0xFF);
 
     if (replacement == 0) {
-      replacement = SBox.getKuznyechik((rightRotation(input ^ 0x5A, shift ^ i)) & 0xFF) | 1;
+      replacement = getSBox(edgeDimension + 1,
+              (rightRotation(input ^ 0x5A, shift ^ i)) & 0xFF) | 1;
     }
 
     return replacement;

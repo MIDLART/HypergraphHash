@@ -1,4 +1,4 @@
-package org.hypergraph_hash.testHash;
+package org.hypergraph_hash.test_hash;
 
 import org.hypergraph_hash.hypergraph.HomogenousHypergraph;
 import org.hypergraph_hash.hypergraph.HyperEdge;
@@ -111,9 +111,7 @@ class GaloisHypergraphTransformTest {
     var hash = hashAlg.encryption(message);
 
     double percentSum = 0;
-
-//    var encryptionAlg = new HypergraphEncryption(key, 1);
-//    var encryption = encryptionAlg.encryption(message);
+    int outlierCount = 0;
 
     // ASSERTION
     for (int i = 0; i < message.length * 8; i++) {
@@ -124,38 +122,18 @@ class GaloisHypergraphTransformTest {
       percentSum += percent;
 
       if (percent < 40) {
+        outlierCount++;
+
         System.out.println("!!!{" + i + "}");
-        System.out.println(Arrays.toString(message));
-        System.out.println(Arrays.toString(bitChanged));
       }
       System.out.println("hash: " + (int) percent + "%");
-
-//      int differentBitsEncryption = differentBitsCount(encryption, encryptionAlg.encryption(bitChanged));
-//      double percentEncryption = (double) differentBitsEncryption / (message.length * 8) * 100;
-//      System.out.println("encryption: " + (int) percentEncryption + "%");
     }
 
     double averagePercent = percentSum / (message.length * 8);
     System.out.println("Average percent: " + averagePercent);
+    System.out.println("Outlier count: " + outlierCount);
+
     assertThat(averagePercent).isGreaterThan(49);
-  }
-
-  @Test
-  void formulaTest() {
-    int[] frequency = new int[256];
-    int k = 3;
-
-    for (int i = 0; i < 128; i++) {
-      for (int adjacentVertex = 0; adjacentVertex < 128; adjacentVertex++) {
-        int input = ((i * k) ^ adjacentVertex ^ leftRotation(i * k, k) ^ rightRotation(adjacentVertex, k - 1)) & 0xFF;
-
-        frequency[input]++;
-      }
-    }
-
-    for (int i = 0; i < 256; i++) {
-      assertThat(frequency[i]).isPositive();
-      System.out.println(i + " : " + frequency[i]);
-    }
+    assertThat(outlierCount).isZero();
   }
 }

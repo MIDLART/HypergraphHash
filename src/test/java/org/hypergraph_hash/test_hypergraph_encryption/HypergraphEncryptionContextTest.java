@@ -1,4 +1,4 @@
-package org.hypergraph_hash.testHypergraphEncryption;
+package org.hypergraph_hash.test_hypergraph_encryption;
 
 import org.hypergraph_hash.symmetric_encryption.SymmetricAlgorithm;
 import org.hypergraph_hash.hypergraph.HomogenousHypergraph;

@@ -1,5 +1,6 @@
 package org.hypergraph_hash;
 
+import org.hypergraph_hash.hypergraph.transform.BlockTransform;
 import org.hypergraph_hash.symmetric_encryption.block.ArrayRead;
 import org.hypergraph_hash.symmetric_encryption.block.ReadBlock;
 import org.hypergraph_hash.symmetric_encryption.modes.Padding;
