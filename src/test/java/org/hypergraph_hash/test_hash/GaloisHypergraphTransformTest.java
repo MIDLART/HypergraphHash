@@ -4,13 +4,28 @@ import org.hypergraph_hash.hypergraph.HomogenousHypergraph;
 import org.hypergraph_hash.hypergraph.HyperEdge;
 import org.hypergraph_hash.hypergraph.transform.hash.GaloisHypergraphTransform;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
+import java.util.Random;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hypergraph_hash.data.Key.KEY32;
 import static org.hypergraph_hash.operations.BitOperations.*;
+import static org.hypergraph_hash.testing_utils.Print.detailPrint;
+import static org.hypergraph_hash.testing_utils.Print.detailPrintln;
 
 class GaloisHypergraphTransformTest {
+  private static final Random random = new Random();
+
+  private static final boolean DETAILED_PRINT = false;
+
+  private static final int MESSAGE_LEN = 32;
+  private static final int MESSAGES_COUNT = 1000;
+
   @Test
   void test() {
     // SETUP
@@ -64,41 +79,6 @@ class GaloisHypergraphTransformTest {
   @Test
   void avalancheEffectTest() {
     // SETUP
-    var key = HomogenousHypergraph.ofEdges(
-            HyperEdge.of(0, 1, 7),
-            HyperEdge.of(1, 8, 5),
-            HyperEdge.of(2, 10, 3),
-            HyperEdge.of(3, 7, 31),
-            HyperEdge.of(4, 5, 6),
-            HyperEdge.of(5, 25, 1),
-            HyperEdge.of(6, 2, 9),
-            HyperEdge.of(7, 4, 2),
-            HyperEdge.of(8, 22, 1),
-            HyperEdge.of(9, 6, 8),
-            HyperEdge.of(10, 7, 9),
-            HyperEdge.of(11, 0, 15),
-            HyperEdge.of(12, 13, 2),
-            HyperEdge.of(13, 11, 14),
-            HyperEdge.of(14, 22, 3),
-            HyperEdge.of(15, 5, 9),
-            HyperEdge.of(16, 10, 22),
-            HyperEdge.of(17, 12, 19),
-            HyperEdge.of(18, 3, 25),
-            HyperEdge.of(19, 16, 28),
-            HyperEdge.of(20, 7, 31),
-            HyperEdge.of(21, 9, 14),
-            HyperEdge.of(22, 18, 27),
-            HyperEdge.of(23, 4, 30),
-            HyperEdge.of(24, 11, 26),
-            HyperEdge.of(25, 8, 21),
-            HyperEdge.of(26, 15, 29),
-            HyperEdge.of(27, 6, 20),
-            HyperEdge.of(28, 13, 23),
-            HyperEdge.of(29, 17, 24),
-            HyperEdge.of(30, 0, 31),
-            HyperEdge.of(31, 19, 25)
-    );
-
     byte[] message = {
             (byte) 0x57, (byte) 0x30, (byte) 0x4A, (byte) 0xF5, (byte) 0x44, (byte) 0xA9, (byte) 0x00, (byte) 0xFF,
             (byte) 0xC4, (byte) 0x01, (byte) 0x43, (byte) 0xAA, (byte) 0x1B, (byte) 0xB9, (byte) 0xFC, (byte) 0x5D,
@@ -107,7 +87,7 @@ class GaloisHypergraphTransformTest {
     };
 
     // EXECUTION
-    var hashAlg = new GaloisHypergraphTransform(key);
+    var hashAlg = new GaloisHypergraphTransform(KEY32);
     var hash = hashAlg.encryption(message);
 
     double percentSum = 0;
@@ -124,9 +104,9 @@ class GaloisHypergraphTransformTest {
       if (percent < 40) {
         outlierCount++;
 
-        System.out.println("!!!{" + i + "}");
+        detailPrint("!!!{" + i + "}", DETAILED_PRINT);
       }
-      System.out.println("hash: " + (int) percent + "%");
+      detailPrintln("hash: " + (int) percent + "%", DETAILED_PRINT);
     }
 
     double averagePercent = percentSum / (message.length * 8);
@@ -136,4 +116,82 @@ class GaloisHypergraphTransformTest {
     assertThat(averagePercent).isGreaterThan(49);
     assertThat(outlierCount).isZero();
   }
+
+  @ParameterizedTest
+  @MethodSource("messageProvider")
+  void bitIndependenceTest(byte[] message) {
+    // EXECUTION
+    var hashAlg = new GaloisHypergraphTransform(KEY32);
+    var hash = hashAlg.encryption(message);
+
+    int bitLen = message.length * 8;
+
+    int[][] jointCount = new int[bitLen][bitLen];
+    int[] changedCount = new int[bitLen];
+
+    for (int i = 0; i < bitLen; i++) {
+      byte[] bitChanged = bitChanging(message, i);
+      byte[] differentBits = xor(hash, hashAlg.encryption(bitChanged));
+
+      for (int j = 0; j < bitLen; j++) {
+        if (bitAt(j, differentBits) != 0) {
+          changedCount[j]++;
+
+          for (int k = j + 1; k < bitLen; k++) {
+            if (bitAt(k, differentBits) != 0) {
+              jointCount[j][k]++;
+            }
+          }
+        }
+      }
+    }
+
+    double bic = getBIC(bitLen, changedCount, jointCount);
+    detailPrintln(String.valueOf(bic), DETAILED_PRINT);
+
+    // ASSERTION
+
+    assertThat(bic).isLessThan(0.4);
+  }
+
+
+  // region Providers
+
+  static Stream<Arguments> messageProvider() {
+    return Stream.generate(() -> {
+              byte[] message = new byte[MESSAGE_LEN];
+              random.nextBytes(message);
+
+              return message;
+            }).map(Arguments::of)
+            .limit(MESSAGES_COUNT);
+  }
+
+  // endregion
+
+  // region utilities
+
+  private static double getBIC(int bitLen, int[] changedCount, int[][] jointCount) {
+    double bic = 0;
+
+    for (int j = 0; j < bitLen; j++) {
+      double pj = (double) changedCount[j] / bitLen;
+
+      for (int k = j + 1; k < bitLen; k++) {
+        double pk = (double) changedCount[k] / bitLen;
+        double pjk = (double) jointCount[j][k] / bitLen;
+
+        double numerator = pjk - pj * pk;
+        double denominator = Math.sqrt(pj * (1 - pj) * pk * (1 - pk));
+
+        if (denominator > 1e-9) {
+          double corr = Math.abs(numerator / denominator);
+          bic = Math.max(bic, corr);
+        }
+      }
+    }
+    return bic;
+  }
+
+  // endregion
 }

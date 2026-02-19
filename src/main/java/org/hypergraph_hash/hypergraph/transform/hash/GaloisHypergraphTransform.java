@@ -40,7 +40,7 @@ public class GaloisHypergraphTransform extends HypergraphTransform {
     for (int vertex = 0; vertex < hypergraphAdjacencyLists.length; vertex++) {
       int curVertexBlockIndex = vertexSelector.applyAsInt(vertex);
 
-      int val = text[curVertexBlockIndex] & 0xFF;
+      int val = getSBox(edgeDimension,text[curVertexBlockIndex] & 0xFF);
       if (val == 0) {
         val = zeroReplacement(vertex, vertex ^ edgeDimension);
       }

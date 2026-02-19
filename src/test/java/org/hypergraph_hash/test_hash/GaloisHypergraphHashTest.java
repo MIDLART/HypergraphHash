@@ -3,7 +3,7 @@ package org.hypergraph_hash.test_hash;
 import org.hypergraph_hash.GaloisHypergraphHash;
 import org.hypergraph_hash.hypergraph.HomogenousHypergraph;
 import org.hypergraph_hash.hypergraph.HyperEdge;
-import org.hypergraph_hash.statistics.Statistics;
+import org.hypergraph_hash.testing_utils.Statistics;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,8 +16,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hypergraph_hash.data.Key.KEY32;
 import static org.hypergraph_hash.operations.BitOperations.bitChanging;
 import static org.hypergraph_hash.operations.BitOperations.differentBitsCount;
+import static org.hypergraph_hash.testing_utils.Print.*;
 
 class GaloisHypergraphHashTest {
   private static final Random random = new Random();
@@ -104,41 +106,6 @@ class GaloisHypergraphHashTest {
   @Test
   void avalancheEffectTest() {
     // SETUP
-    var key = HomogenousHypergraph.ofEdges(
-            HyperEdge.of(0, 1, 7),
-            HyperEdge.of(1, 8, 5),
-            HyperEdge.of(2, 10, 3),
-            HyperEdge.of(3, 7, 31),
-            HyperEdge.of(4, 5, 6),
-            HyperEdge.of(5, 25, 1),
-            HyperEdge.of(6, 2, 9),
-            HyperEdge.of(7, 4, 2),
-            HyperEdge.of(8, 22, 1),
-            HyperEdge.of(9, 6, 8),
-            HyperEdge.of(10, 7, 9),
-            HyperEdge.of(11, 0, 15),
-            HyperEdge.of(12, 13, 2),
-            HyperEdge.of(13, 11, 14),
-            HyperEdge.of(14, 22, 3),
-            HyperEdge.of(15, 5, 9),
-            HyperEdge.of(16, 10, 22),
-            HyperEdge.of(17, 12, 19),
-            HyperEdge.of(18, 3, 25),
-            HyperEdge.of(19, 16, 28),
-            HyperEdge.of(20, 7, 31),
-            HyperEdge.of(21, 9, 14),
-            HyperEdge.of(22, 18, 27),
-            HyperEdge.of(23, 4, 30),
-            HyperEdge.of(24, 11, 26),
-            HyperEdge.of(25, 8, 21),
-            HyperEdge.of(26, 15, 29),
-            HyperEdge.of(27, 6, 20),
-            HyperEdge.of(28, 13, 23),
-            HyperEdge.of(29, 17, 24),
-            HyperEdge.of(30, 0, 31),
-            HyperEdge.of(31, 19, 25)
-    );
-
     byte[] message = {
             (byte) 0x57, (byte) 0x30, (byte) 0x4A, (byte) 0xF5, (byte) 0x44, (byte) 0xA9, (byte) 0x00, (byte) 0xFF,
             (byte) 0xC4, (byte) 0x01, (byte) 0x43, (byte) 0xAA, (byte) 0x1B, (byte) 0xB9, (byte) 0xFC, (byte) 0x5D,
@@ -147,7 +114,7 @@ class GaloisHypergraphHashTest {
     };
 
     // EXECUTION
-    var hashAlg = new GaloisHypergraphHash(key, 32);
+    var hashAlg = new GaloisHypergraphHash(KEY32, 32);
     var hash = hashAlg.hash(message);
 
     double hashPercentSum = 0;
@@ -163,9 +130,9 @@ class GaloisHypergraphHashTest {
         outlierCount++;
         if (percent < 35) criticalOutlierCount++;
 
-        detailPrint("!!!{" + i + "}");
+        detailPrint("!!!{" + i + "}", DETAILED_PRINT);
       }
-      detailPrintln("hash: " + (int) percent + "%");
+      detailPrintln("hash: " + (int) percent + "%", DETAILED_PRINT);
 
       hashPercentSum += percent;
     }
@@ -195,7 +162,7 @@ class GaloisHypergraphHashTest {
     stats.print();
 
     if (DETAILED_PRINT) {
-      printSortedHashCountMap();
+      printSortedHashCountMap(hashCountMap);
     }
   }
 
@@ -233,30 +200,6 @@ class GaloisHypergraphHashTest {
     }
 
     return hexString.toString();
-  }
-
-  private static void printSortedHashCountMap() {
-    System.out.println("\n=== HASHES ===\n");
-
-    List<Map.Entry<String, AtomicInteger>> sortedEntries = new ArrayList<>(hashCountMap.entrySet());
-    sortedEntries.sort((e1, e2)
-                    -> Integer.compare(e2.getValue().get(), e1.getValue().get()));
-
-    for (var entry : sortedEntries) {
-      System.out.println(entry.getKey() + ": " + entry.getValue());
-    }
-  }
-
-  private static void detailPrint(String message) {
-    if (DETAILED_PRINT) {
-      System.out.print(message);
-    }
-  }
-
-  private static void detailPrintln(String message) {
-    if (DETAILED_PRINT) {
-      System.out.println(message);
-    }
   }
 
   // endregion

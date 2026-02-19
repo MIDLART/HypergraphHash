@@ -1,4 +1,4 @@
-package org.hypergraph_hash.statistics;
+package org.hypergraph_hash.testing_utils;
 
 import lombok.Getter;
 
